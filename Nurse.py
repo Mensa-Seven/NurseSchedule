@@ -11,7 +11,7 @@ class  NurseScheduling:
 
         self._hardConstraintPenalty = hardConstraintPenalty
         #list of nurses รายชื่อพยาบาล
-        self._nurses = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+        self._nurses = ['(1)พยาบาล', '(2)พยาบาล', '(3)พยาบาล', '(4)พยาบาล', '(5)พยาบาล', '(6)พยาบาล', '(7พยาบาล)', '(8)พยาบาล']
         '''
         nurses' respective shift preferences - morning, evening, night:
 
@@ -64,6 +64,7 @@ class  NurseScheduling:
         return len(self._nurses) * self._shiftWeek * self._weeks
 
     def getCost(self, schedule):
+
         """
         Calculates the total cost of the various violations in the given schedule
         ...
@@ -75,6 +76,12 @@ class  NurseScheduling:
             raise ValueError("size of schedule list should be equal to ", self.__len__())
 
         # convert entire schedule into a dictionary with a separate schedule for each nurse:
+        '''
+        จำนวน Array ของพยาบาลในเเต่ละผลัด เช่น
+        {'A': array([0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1])
+         'B': array([0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1])
+        }
+        '''
         nurseShiftsDict = self.getNurseShifts(schedule)
 
         # count the various violations:
@@ -87,22 +94,29 @@ class  NurseScheduling:
         hardContstraintViolations = consecutiveShiftViolations + nursesPerShiftViolations + shiftsPerWeekViolations
         softContstraintViolations = shiftPreferenceViolations
 
-        return self.hardConstraintPenalty * hardContstraintViolations + softContstraintViolations
+        return self._hardConstraintPenalty * hardContstraintViolations + softContstraintViolations
 
     def getNurseShifts(self, schedule):
         """
-        Converts the entire schedule into a dictionary with a separate schedule for each nurse
-        :param schedule: a list of binary values describing the given schedule
-        :return: a dictionary with each nurse as a key and the corresponding shifts as the value
+        ฟังก์ชันนี้จะส่ง schedule จัดเเล้วใส่ไปในตัวเเปรของ nurseShiftsDict
+        return schedule ของพยาบาลทั้งหมด
         """
-        shiftsPerNurse = self.__len__() // len(self.nurses)
+        #จำนวนผลัดทั้งหมด
+        shiftsPerNurse = self.__len__() // len(self._nurses)
+        #เอาไว้เก็บข้อมูลผลัดของเเต่ละคนเมื่อวัดเสร็จเเล้ว
         nurseShiftsDict = {}
+        #เอาไว้เลื่อนตารางผลัดของเเต่ละคน
         shiftIndex = 0
 
-        for nurse in self.nurses:
+        for nurse in self._nurses:
+            #{'A': array([0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1])} ตัวอย่างข้อมูลที่จะเพิ่มเข้าไป
+            #ขยับเพิ่มไปทีละคน
             nurseShiftsDict[nurse] = schedule[shiftIndex:shiftIndex + shiftsPerNurse]
+
+
             shiftIndex += shiftsPerNurse
 
+        print('--------------------------------')
         return nurseShiftsDict
 
     def countConsecutiveShiftViolations(self, nurseShiftsDict):
@@ -122,23 +136,25 @@ class  NurseScheduling:
 
     def countShiftsPerWeekViolations(self, nurseShiftsDict):
         """
-        Counts the max-shifts-per-week violations in the schedule
-        :param nurseShiftsDict: a dictionary with a separate schedule for each nurse
+        ฟังก์ชันนี้จะเป็นการรวมผลัดของพยาบาลเเต่ละคน ใน 7 วัน
         :return: count of violations found
         """
         violations = 0
         weeklyShiftsList = []
-        # iterate over the shifts of each nurse:
         for nurseShifts in nurseShiftsDict.values():  # all shifts of a single nurse
             # iterate over the shifts of each weeks:
-            for i in range(0, self.weeks * self.shiftsPerWeek, self.shiftsPerWeek):
+            for i in range(0, self._weeks * self._shiftWeek, self._shiftWeek):
                 # count all the '1's over the week:
-                weeklyShifts = sum(nurseShifts[i:i + self.shiftsPerWeek])
+
+                #weeklyShifts 1 = [1 0 1 1 1 0 1 1 1 0 1 1 0 0 1 1 0 1 0 0 1]
+                weeklyShifts = sum(nurseShifts[i:i + self._shiftWeek])
                 weeklyShiftsList.append(weeklyShifts)
-                if weeklyShifts > self.maxShiftsPerWeek:
-                    violations += weeklyShifts - self.maxShiftsPerWeek
+                # นับจำนวนผลัดที่เกินมา
+                if weeklyShifts > self._maxShiftsPerWeek:
+                    violations += weeklyShifts - self._maxShiftsPerWeek
 
         return weeklyShiftsList, violations
+
 
     def countNursesPerShiftViolations(self, nurseShiftsDict):
         """
@@ -152,26 +168,36 @@ class  NurseScheduling:
         violations = 0
         # iterate over all shifts and count violations:
         for shiftIndex, numOfNurses in enumerate(totalPerShiftList):
-            dailyShiftIndex = shiftIndex % self.shiftPerDay  # -> 0, 1, or 2 for the 3 shifts per day
-            if (numOfNurses > self.shiftMax[dailyShiftIndex]):
-                violations += numOfNurses - self.shiftMax[dailyShiftIndex]
-            elif (numOfNurses < self.shiftMin[dailyShiftIndex]):
-                violations += self.shiftMin[dailyShiftIndex] - numOfNurses
+            dailyShiftIndex = shiftIndex % self._shiftDay  # -> 0, 1, or 2 for the 3 shifts per day
+            if (numOfNurses > self._shiftMax[dailyShiftIndex]):
+                violations += numOfNurses - self._shiftMax[dailyShiftIndex]
+            elif (numOfNurses < self._shiftMin[dailyShiftIndex]):
+                violations += self._shiftMin[dailyShiftIndex] - numOfNurses
 
         return totalPerShiftList, violations
 
     def countShiftPreferenceViolations(self, nurseShiftsDict):
+
         """
         Counts the nurse-preferences violations in the schedule
         :param nurseShiftsDict: a dictionary with a separate schedule for each nurse
         :return: count of violations found
         """
         violations = 0
-        for nurseIndex, shiftPreference in enumerate(self.shiftPreference):
+
+        for nurseIndex, shiftPreference in enumerate(self._shiftPreference):
+
+            print(f' shiftPreference {shiftPreference}')
             # duplicate the shift-preference over the days of the period
-            preference = shiftPreference * (self.shiftsPerWeek // self.shiftPerDay)
+            # (self._shiftWeek // self._shiftDay) = 7
+            preference = shiftPreference * (self._shiftWeek // self._shiftDay)
+            print(f' preference {preference}')
+            print('------------------------------------')
             # iterate over the shifts and compare to preferences:
-            shifts = nurseShiftsDict[self.nurses[nurseIndex]]
+            #shifts ผลัดของเเต่ละคน
+            shifts = nurseShiftsDict[self._nurses[nurseIndex]]
+            zipPer = zip(preference, shifts)
+
             for pref, shift in zip(preference, shifts):
                 if pref == 0 and shift == 1:
                     violations += 1
@@ -185,7 +211,7 @@ class  NurseScheduling:
         """
         nurseShiftsDict = self.getNurseShifts(schedule)
 
-        print("Schedule for each nurse:")
+        print("ตารางของเวรพยาบาล:")
         for nurse in nurseShiftsDict:  # all shifts of a single nurse
             print(nurse, ":", nurseShiftsDict[nurse])
 
@@ -193,7 +219,7 @@ class  NurseScheduling:
         print()
 
         weeklyShiftsList, violations = self.countShiftsPerWeekViolations(nurseShiftsDict)
-        print("weekly Shifts = ", weeklyShiftsList)
+        print("จำนวนผลัดของพยาบาลทั้งหมด = ", weeklyShiftsList)
         print("Shifts Per Week Violations = ", violations)
         print()
 
@@ -210,8 +236,9 @@ class  NurseScheduling:
 # testing the class:
 def main():
     # create a problem instance:
-    nurses = NurseSchedulingProblem(10)
+    nurses = NurseScheduling(10)
 
+    #randomSolution เป็นสุ่มตารางเวร
     randomSolution = np.random.randint(2, size=len(nurses))
     print("Random Solution = ")
     print(randomSolution)
