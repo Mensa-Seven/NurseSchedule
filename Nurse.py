@@ -121,14 +121,14 @@ class  NurseScheduling:
 
     def countConsecutiveShiftViolations(self, nurseShiftsDict):
         """
-        Counts the consecutive shift violations in the schedule
-        :param nurseShiftsDict: a dictionary with a separate schedule for each nurse
+        ฟังก์ชันนี้จะหาผลัดที่ขึ้นติดต่อกัน เช่น [1, 1, 0], [0, 1, 1]
         :return: count of violations found
         """
         violations = 0
         # iterate over the shifts of each nurse:
         for nurseShifts in nurseShiftsDict.values():
-            # look for two cosecutive '1's:
+
+            # หาผลัดที่ขึ้นติดต่อกัน '1's:
             for shift1, shift2 in zip(nurseShifts, nurseShifts[1:]):
                 if shift1 == 1 and shift2 == 1:
                     violations += 1
