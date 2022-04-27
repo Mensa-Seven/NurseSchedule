@@ -31,18 +31,18 @@ class Schedule(object):
 
     def PrintSchedule(self):
         self.ScheduleNures()
-        #print('ตารางขึ้นเวร ')
-        #for ind, nures in enumerate(self._nuresSchedule):
-            #print(f'{nures} {self._nuresSchedule[nures]}')
+        print('ตารางขึ้นเวร ')
+        for ind, nures in enumerate(self._nuresSchedule):
+            print(f'{nures} {self._nuresSchedule[nures]}')
 
 
-        #print('จำนวนผลัดที่ขึ้นติดต่อกัน', self.countConsecutive)
+        print('จำนวนผลัดที่ขึ้นติดต่อกัน', self.countConsecutive)
 
     def CountWeek(self):
         for index, nures in enumerate(self._nuresSchedule):
             window = 21
             index = 0
-            for i in range(3):
+            for i in range(4):
                 self._countWeek[nures] = sum(self._nuresSchedule[nures][index:window])
                 window += 21
                 index += 21
@@ -52,12 +52,11 @@ class Schedule(object):
         for i, N in enumerate(self._nuresSchedule):
             window = 3
             index = 0
-            for i in range(21):
+            for i in range(self._day):
                 self._nuresSchedule[N][index:window]
 
                 self.ConsecutivePart(nures = N, shift = self._nuresSchedule[N][index:window], index = index , window = window)
                 self.CountConsecutive( nures = N, shift = self._nuresSchedule[N][index:window])
-                print(i,N,'', self._nuresSchedule[N][index:window])
                 index += 3
                 window += 3
 
@@ -105,7 +104,6 @@ def main():
 
     Schedules = ContsTraint(nures = ["A", "C", "D"], day = 30)
     Schedules.PrintSchedule()
-    print(Schedules._nuresSchedule['D'])
 
 
 if __name__ == "__main__":
