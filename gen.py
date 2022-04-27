@@ -19,11 +19,14 @@ NurseDic = {}
 for N in _Nures:
     NurseDic[N] =  genshift
 
+print(NurseDic['A'])
+
+
 newShift = np.random.randint(len(shiftDream), size = 1)
 
+print(newShift)
+NurseDic['A'][0:3] = [0, 0, 0]
+NurseDic['A'][0:3] = newShift
 
-for index, nures in enumerate(_Nures):
-    checkshift = NurseDic[nures]
 
-
-print(NurseDic['A'], sum(NurseDic['A']))
+print(NurseDic['A'])
