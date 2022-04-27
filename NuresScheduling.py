@@ -26,7 +26,7 @@ class Schedule(object):
 
         self.CountWeek()
         self.ShiftLimit()
-        self.CountConsecutive()
+        self.Consecutive()
 
     def PrintSchedule(self):
         self.ScheduleNures()
@@ -34,25 +34,32 @@ class Schedule(object):
         for ind, nures in enumerate(self._nuresSchedule):
             print(f'{ind} {self._nuresSchedule[nures]}')
 
+
         print('')
-        print('จำนวนในการสุ่มตารางให้เข้าเป้าทั้งหมด ',self.count ,'ครั้ง')
 
     def CountWeek(self):
         for index, nures in enumerate(self._nuresSchedule):
             if sum(self._nuresSchedule[nures]) >= 6:
                 self.countWeek[nures] = sum(self._nuresSchedule[nures])
 
-    def CountConsecutive(self):
+    def Consecutive(self):
         for i, N in enumerate(self._nuresSchedule):
             window = 3
             index = 0
             for i in range(7):
                 self._nuresSchedule[N][index:window]
-                self.ConsecutivePart(nures = N, shift = self._nuresSchedule[N][index:window], index = index , window = window)
 
+                self.ConsecutivePart(nures = N, shift = self._nuresSchedule[N][index:window], index = index , window = window)
+                self.CountConsecutive( nures = N, shift = self._nuresSchedule[N][index:window])
                 index += 3
                 window += 3
 
+    def CountConsecutive(self, nures ,shift):
+        shift = str(shift).strip("[, ]")
+        count = 0
+        if shift == '1 1 1' or shift == '0 1 1' or shift == '1 1 0':
+            count +=1
+            print('จำนวนผลัดที่ขึ้นติดต่อกัน', count)
 
     def TEST(self):
         """ """
@@ -66,12 +73,10 @@ class ContsTraint(Schedule):
 
     def ShiftLimit(self):
 
-        self.count = 0
         for index, nures in enumerate(self.countWeek):
             while sum(self._nuresSchedule[nures]) >= 6:
                 pop = self.Population(size = 7)
                 self._nuresSchedule[nures] = pop
-                self.count += 1
                 self.CountWeek()
 
     def ConsecutivePart(self, nures, shift, index, window):
@@ -91,18 +96,12 @@ class ContsTraint(Schedule):
             newShift = np.random.randint(len(shiftDream), size = 1)
             self._nuresSchedule[nures][index:window] = shiftDream[newShift[0]]
 
-            self.count += 1
-
-
-
-
 
 
 def main():
 
     Schedules = ContsTraint(nures = ["A", "B", "C"], day = 7)
     Schedules.PrintSchedule()
-    Schedules.TEST()
 
 
 if __name__ == "__main__":
