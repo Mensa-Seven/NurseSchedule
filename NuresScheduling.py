@@ -76,23 +76,29 @@ class Schedule(object):
             }
 
 
-    def Consecutive(self):
+    def SplitDay(self):
         ''' เเบ่งข้อมูลผลัดออกมาเป็นวัน [1, 1, 1] '''
-        data = []
         for i, N in enumerate(self._nuresSchedule):
-            window = 3
-            index = 0
 
-            for i in range(0 ,self._day):
-                ''' สร้างผลัดออกมาเป็น 30 วัน'''
-                self.ConsecutivePart(nures = N, shift = self._nuresSchedule[N][index:window], index = index , window = window)
-                self.CountConsecutive( nures = N, shift = self._nuresSchedule[N][index:window])
+            for shiftWeek in range(0 ,self._week):
+                window = 3
+                index = 0
+                print(N, self._nuresSchedule[N][f"shiftWeek({shiftWeek +1 })"])
+                for i in range(0, self._day):
+                    print(N, self._nuresSchedule[N][f"shiftWeek({shiftWeek +1})"][index:window])
+                    index +=3
+                    window +=3
 
-                print(N,'',self._nuresSchedule[N][index:window])
-                data.append(f'{N}:{self._nuresSchedule[N][index:window]}')
+
+
+                #self.ConsecutivePart(nures = N, shift = self._nuresSchedule[N][index:window], index = index , window = window)
+                #self.CountConsecutive( nures = N, shift = self._nuresSchedule[N][index:window])
+
+                #print(N,'',self._nuresSchedule[N][index:window])
+                #data.append(f'{N}:{self._nuresSchedule[N][index:window]}')
                 #pd.DataFram(data = self._nuresSchedule[N][index:window])
-                index += 3
-                window += 3
+                #index += 3
+                #window += 3
 
 
 
@@ -152,7 +158,7 @@ def main():
 
     Schedules = ContsTraint(nurse = ["A", "C", "D"], day = 7)
     Schedules.PrintSchedule()
-
+    Schedules.SplitDay()
 
 if __name__ == "__main__":
     main()
