@@ -42,7 +42,6 @@ class Schedule(object):
                 "shiftWeek(4)":self.Population(size = 7),
             }
 
-        self._shiftFrame = pd.DataFrame(self._nuresSchedule)
 
         #print(json.dumps(data))
         #self.CountWeek()
@@ -63,15 +62,14 @@ class Schedule(object):
 
     def CountWeek(self):
         ''' สร้างเก็บข้อมููลการทำงานรวมในเเต่ละสัปดาห์'''
+        shiftWeek = 1
         for index, nures in enumerate(self._nuresSchedule):
-            window = 21
-            index = 0
-
-            for i in range(4):
-                '''รวมผลัดทั้งหมดในเเต่ละสัปดาห์'''
-                self._countWeek[nures] = sum(self._nuresSchedule[nures][index:window])
-                window += 21
-                index += 21
+            self._countWeek[nures] = {
+                "countWeek(1)":sum(self._nuresSchedule[nures][f"shiftWeek({shiftWeek})"]),
+                "countWeek(2)":sum(self._nuresSchedule[nures][f"shiftWeek({shiftWeek + 1})"]),
+                "countWeek(3)":sum(self._nuresSchedule[nures][f"shiftWeek({shiftWeek +2})"]),
+                "countWeek(4)":sum(self._nuresSchedule[nures][f"shiftWeek({shiftWeek +3})"])
+            }
 
 
     def Consecutive(self):
@@ -155,7 +153,7 @@ def main():
 
     Schedules = ContsTraint(nurse = ["A", "C", "D"], day = 7)
     Schedules.ScheduleNures()
-    print(Schedules._shiftFrame)
+    Schedules.CountWeek()
 
 
 if __name__ == "__main__":
