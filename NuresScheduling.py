@@ -85,14 +85,16 @@ class Schedule(object):
                 index = 0
                 print(N, self._nuresSchedule[N][f"shiftWeek({shiftWeek +1 })"])
                 for i in range(0, self._day):
-                    print(N, self._nuresSchedule[N][f"shiftWeek({shiftWeek +1})"][index:window])
+                    #print(N, self._nuresSchedule[N][f"shiftWeek({shiftWeek +1})"][index:window])
+                    self.ConsecutivePart(nurse = N,
+                                        shift = self._nuresSchedule[N][f"shiftWeek({shiftWeek +1})"][index:window],
+                                        week = f"shiftWeek({shiftWeek +1})",
+                                        index = index,
+                                        window = window)
+
                     index +=3
                     window +=3
 
-
-
-                #self.ConsecutivePart(nures = N, shift = self._nuresSchedule[N][index:window], index = index , window = window)
-                #self.CountConsecutive( nures = N, shift = self._nuresSchedule[N][index:window])
 
                 #print(N,'',self._nuresSchedule[N][index:window])
                 #data.append(f'{N}:{self._nuresSchedule[N][index:window]}')
@@ -135,7 +137,7 @@ class ContsTraint(Schedule):
 
 
 
-    def ConsecutivePart(self, nures, shift, index, window):
+    def ConsecutivePart(self, nurse, shift,week, index, window):
         '''หนึ่งวันต้องไม่มีการขึ้น 3 ผลัดในหนึ่งวัน เเล้วไม่มีมีการขึ้นผลัดบ่ายควบกับผลัดดึก ถ้าหากมี ก็ให้สุ่มข้อมูลผลัดใหม่จาก ที่กำหนดไว้'''
         shiftDream = [
         [1, 0, 0],
@@ -145,12 +147,13 @@ class ContsTraint(Schedule):
         [1, 0, 1],
         [0, 0, 0]
         ]
+        #print(self._nuresSchedule[nurse][week][index:window])
 
         shift = str(shift).strip("[, ]")
 
         if shift == "1 1 1" or shift == "0 1 1":
-            newShift = np.random.randint(len(shiftDream), size = 1)
-            self._nuresSchedule[nures][index:window] = shiftDream[newShift[0]]
+            newShift =  np.random.randint(len(shiftDream), size = 1)
+            self._nuresSchedule[nurse][week][index:window] = shiftDream[newShift[0]]
 
 
 
