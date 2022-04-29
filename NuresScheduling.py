@@ -21,7 +21,7 @@ class Schedule(object):
         #นับจำนวนผลัดที่ขึ้นติดต่อกัน
         self.countConsecutive = 0
         self._shiftFrame = None
-        self._data = {}
+        self._week = 4
 
 
 
@@ -36,29 +36,33 @@ class Schedule(object):
 
         for index, nurse in enumerate(self._nurse):
             self._nuresSchedule[nurse] = {
-                "shiftWeek(1)":self.Population(size = 7),
-                "shiftWeek(2)":self.Population(size = 7),
-                "shiftWeek(3)":self.Population(size = 7),
-                "shiftWeek(4)":self.Population(size = 7),
+                "shiftWeek(1)":self.Population(size = self._day),
+                "shiftWeek(2)":self.Population(size = self._day),
+                "shiftWeek(3)":self.Population(size = self._day),
+                "shiftWeek(4)":self.Population(size = self._day),
             }
 
 
-        #print(json.dumps(data))
-        #self.CountWeek()
-        #self.ShiftLimit()
+        self.CountWeek()
+        self.ShiftLimit()
         #self.Consecutive()
 
     def PrintSchedule(self):
         ''' เเสดงค่าผลต่าง ๆ หลังจากกันจัดเรียงข้อมูลทั้งหมด'''
         self.ScheduleNures()
-        allSumshift = self.countShiftPerAllViolations()
+        #allSumshift = self.countShiftPerAllViolations()
         print('ตารางขึ้นเวร')
-        for ind, nures in enumerate(self._nuresSchedule):
-            print(f'{nures} {self._nuresSchedule[nures]}')
+        for ind, nurse in enumerate(self._nuresSchedule):
+            for i in range(self._week):
+                print(f'{nurse} {self._nuresSchedule[nurse][f"shiftWeek({i+1})"]}')
 
+        print("จำนวนรวมของการขึ้นผลัดในเเต่ละสัปดาห์")
+        for index, nurse in enumerate(self._countWeek):
+            for i in range(self._week):
+                print(f'{nurse} {self._countWeek[nurse][f"countWeek({i+1})"]}')
 
-        print('จำนวนผลัดที่ขึ้นติดต่อกัน', self.countConsecutive)
-        print("จำนวนผลัดของเเต่ละคน", allSumshift)
+        #print('จำนวนผลัดที่ขึ้นติดต่อกัน', self.countConsecutive)
+        #print("จำนวนผลัดของเเต่ละคน", allSumshift)
 
     def CountWeek(self):
         ''' สร้างเก็บข้อมููลการทำงานรวมในเเต่ละสัปดาห์'''
@@ -90,12 +94,6 @@ class Schedule(object):
                 index += 3
                 window += 3
 
-        #data = str(data)
-        #data = data.strip("[, ]")
-
-        #print(data)
-
-
 
 
 
@@ -122,11 +120,12 @@ class ContsTraint(Schedule):
     def ShiftLimit(self):
         ''' หนึ่งคนในหนึ่งสัปดาห์ต้องเข้าผลัดไม่เกิน 6 ผลัด ถ้าเกินให้สุ่มค่า Population ใหม่จนกว่าจะไม่เกิน'''
 
-        for index, nures in enumerate(self._countWeek):
-            while self._countWeek[nures] > 5:
-                pop = self.Population(size = 30)
-                self._nuresSchedule[nures] = pop
-                self.CountWeek()
+        for index, nurse in enumerate(self._countWeek):
+            for i in range(self._week):
+                while self._countWeek[nurse][f'countWeek({i+1})'] > 5:
+                    pop = self.Population(size = 7)
+                    self._nuresSchedule[nurse][f"shiftWeek({i+1})"] = pop
+                    self.CountWeek()
 
 
 
@@ -152,8 +151,7 @@ class ContsTraint(Schedule):
 def main():
 
     Schedules = ContsTraint(nurse = ["A", "C", "D"], day = 7)
-    Schedules.ScheduleNures()
-    Schedules.CountWeek()
+    Schedules.PrintSchedule()
 
 
 if __name__ == "__main__":
