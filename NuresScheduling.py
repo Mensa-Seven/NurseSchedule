@@ -1,7 +1,4 @@
 import numpy as np
-import pandas as pd
-import json
-from os import path
 
 
 class Schedule(object):
@@ -96,14 +93,6 @@ class Schedule(object):
                     window +=3
 
 
-                #print(N,'',self._nuresSchedule[N][index:window])
-                #data.append(f'{N}:{self._nuresSchedule[N][index:window]}')
-                #pd.DataFram(data = self._nuresSchedule[N][index:window])
-                #index += 3
-                #window += 3
-
-
-
 
     def CountConsecutive(self, nures ,shift):
         shift = str(shift).strip("[, ]")
@@ -146,14 +135,18 @@ class ContsTraint(Schedule):
         [1, 1, 0],
         [1, 0, 1],
         [0, 0, 0]
+
         ]
-        #print(self._nuresSchedule[nurse][week][index:window])
 
         shift = str(shift).strip("[, ]")
 
         if shift == "1 1 1" or shift == "0 1 1":
             newShift =  np.random.randint(len(shiftDream), size = 1)
             self._nuresSchedule[nurse][week][index:window] = shiftDream[newShift[0]]
+
+
+class SolutionCase(Schedule):
+    """ class นี้เอาจัดการเรื่องของ case ต่าง ๆ ที่สร้างขึ้นมา"""
 
 
 
