@@ -40,8 +40,6 @@ class Schedule(object):
 
 
         self.CountWeek()
-        self.ShiftLimit()
-        #self.Consecutive()
 
     def PrintSchedule(self):
         ''' เเสดงค่าผลต่าง ๆ หลังจากกันจัดเรียงข้อมูลทั้งหมด'''
@@ -140,6 +138,42 @@ class ContsTraint(Schedule):
             newShift =  np.random.randint(len(shiftDream), size = 1)
             self._nuresSchedule[nurse][week][index:window] = shiftDream[newShift[0]]
 
+    def LastDay(self):
+        """ วันขึ้นวันใหม่กับวันสุดท้ายของสัปดาห์"""
+
+        for index, nurse in enumerate(self._nuresSchedule):
+            countWeek = 1
+            shiftDream = [
+                [1, 0, 0],
+                [0, 1, 0],
+                [0, 0, 1],
+                [1, 0, 1],
+                [0, 0, 0]
+            ]
+            for i in range(self._week):
+                oldWeek = self._nuresSchedule[nurse][f'shiftWeek({countWeek})'][18:]
+                newWeek = self._nuresSchedule[nurse][f'shiftWeek({countWeek +1})'][:3]
+
+                newWeek = str(newWeek).strip("[, ]")
+                oldWeek = str(oldWeek).strip("[, ]")
+
+                if oldWeek == "0 0 1" and newWeek == "1 1 0":
+                    newShifts =  np.random.randint(len(shiftDream), size = 1)
+                    self._nuresSchedule[nurse][f'shiftWeek({countWeek +1})'][:3] = shiftDream[newShifts[0]]
+
+                if oldWeek == "1 0 1" and newWeek == "1 1 0":
+                    newShifts =  np.random.randint(len(shiftDream), size = 1)
+                    self._nuresSchedule[nurse][f'shiftWeek({countWeek +1})'][:3] = shiftDream[newShifts[0]]
+
+                countWeek +=1
+                if countWeek >3 :
+                    break
+
+                #oldWeek = str(oldWeek).strip("[, ]")
+                #newWeek = str(newWeek).strip("[, ]")
+
+
+
 
 class SolutionCase(ContsTraint):
     """ class นี้เอาจัดการเรื่องของ case ต่าง ๆ ที่สร้างขึ้นมา"""
@@ -152,7 +186,8 @@ class SolutionCase(ContsTraint):
         case = {
             "1":self.ScheduleNures(),
             "2":self.ShiftLimit(),
-            "3":self.SplitDay()
+            "3":self.SplitDay(),
+            "4":self.LastDay()
         }
 
         for i in case:
