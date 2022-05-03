@@ -21,7 +21,6 @@ class Schedule(object):
         self._week = 4
 
 
-
     def Population(self, size):
         '''สุ่มค่า Population'''
         pop = np.random.randint(2, size = self._geneLen)
@@ -46,8 +45,6 @@ class Schedule(object):
 
     def PrintSchedule(self):
         ''' เเสดงค่าผลต่าง ๆ หลังจากกันจัดเรียงข้อมูลทั้งหมด'''
-        self.ScheduleNures()
-        #allSumshift = self.countShiftPerAllViolations()
         print('ตารางขึ้นเวร')
         for ind, nurse in enumerate(self._nuresSchedule):
             for i in range(self._week):
@@ -58,8 +55,7 @@ class Schedule(object):
             for i in range(self._week):
                 print(f'{nurse} {self._countWeek[nurse][f"countWeek({i+1})"]}')
 
-        #print('จำนวนผลัดที่ขึ้นติดต่อกัน', self.countConsecutive)
-        #print("จำนวนผลัดของเเต่ละคน", allSumshift)
+
 
     def CountWeek(self):
         ''' สร้างเก็บข้อมููลการทำงานรวมในเเต่ละสัปดาห์'''
@@ -80,7 +76,6 @@ class Schedule(object):
             for shiftWeek in range(0 ,self._week):
                 window = 3
                 index = 0
-                print(N, self._nuresSchedule[N][f"shiftWeek({shiftWeek +1 })"])
                 for i in range(0, self._day):
                     #print(N, self._nuresSchedule[N][f"shiftWeek({shiftWeek +1})"][index:window])
                     self.ConsecutivePart(nurse = N,
@@ -107,6 +102,7 @@ class Schedule(object):
             weekShiftList.append(f'{nures} : {sum(self._nuresSchedule[nures])}')
 
         return weekShiftList
+
 
 class ContsTraint(Schedule):
     ''' คลาสนี้จะทำการสร้าง กฎต่างๆหรือ ContsTrint เเล้วทำการปรับข้อมูลตาราง'''
@@ -145,16 +141,33 @@ class ContsTraint(Schedule):
             self._nuresSchedule[nurse][week][index:window] = shiftDream[newShift[0]]
 
 
-class SolutionCase(Schedule):
+class SolutionCase(ContsTraint):
     """ class นี้เอาจัดการเรื่องของ case ต่าง ๆ ที่สร้างขึ้นมา"""
+    def __init__(self, nurse, day):
+        super().__init__(nurse, day)
+        ContsTraint.__init__(self, nurse, day)
 
+    def TestCase(self):
+        """ เอาไว้รันในเเต่ละ case ที่เราสร้างขึ้นมา"""
+        case = {
+            "1":self.ScheduleNures(),
+            "2":self.ShiftLimit(),
+            "3":self.SplitDay()
+        }
 
+        for i in case:
+            try:
+                case[f'{i}']
+            except:
+                print("เกิดขึ้นผิดพลาดบางอย่างใน TestCase")
+
+        """ รันครบทุก case เเล้วใหัทำการเเสดงผลออกมา """
+        self.PrintSchedule()
 
 def main():
 
-    Schedules = ContsTraint(nurse = ["A", "C", "D"], day = 7)
-    Schedules.PrintSchedule()
-    Schedules.SplitDay()
+    Schedules = SolutionCase(nurse = ["A", "C", "D"], day = 7)
+    Schedules.TestCase()
 
 if __name__ == "__main__":
     main()
