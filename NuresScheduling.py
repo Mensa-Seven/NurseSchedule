@@ -169,17 +169,14 @@ class ContsTraint(Schedule):
                 if countWeek >3 :
                     break
 
-                #oldWeek = str(oldWeek).strip("[, ]")
-                #newWeek = str(newWeek).strip("[, ]")
-
-
-
 
 class SolutionCase(ContsTraint):
     """ class นี้เอาจัดการเรื่องของ case ต่าง ๆ ที่สร้างขึ้นมา"""
     def __init__(self, nurse, day):
         super().__init__(nurse, day)
         ContsTraint.__init__(self, nurse, day)
+
+        self.countCase = 0
 
     def TestCase(self):
         """ เอาไว้รันในเเต่ละ case ที่เราสร้างขึ้นมา"""
@@ -198,6 +195,8 @@ class SolutionCase(ContsTraint):
 
         """ รันครบทุก case เเล้วใหัทำการเเสดงผลออกมา """
         self.PrintSchedule()
+
+
 
 def main():
 
