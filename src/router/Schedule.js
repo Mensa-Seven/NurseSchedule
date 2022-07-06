@@ -8,23 +8,25 @@ const Duty = require('../model/Duty.js')
 const router = express.Router()
 const date = new Date()
  
+var dutys  = []
+
 
 /// ดึงข้อมูลงานทั้งหมด
 router.get('/all', authMiddleware, async(req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
-
     if(!token) return res.send({
         message:"invalid Token"
     })
 
     try{
-
-        await Duty.find()
-        .then(data => {
-            res.send({data})
-        })
-        
+       Duty.find({location:'A'})
+       .populate('_user')
+       .populate('_schedule')
+       .exec(function(error, data){
+        res.send({data})
+       })
+    
 
     }catch( error ){
         res.send({error})
