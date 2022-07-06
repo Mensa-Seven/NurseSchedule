@@ -20,7 +20,7 @@ router.get('/all', authMiddleware, async(req, res) => {
     })
 
     try{
-       Duty.find({location:'A'})
+       Duty.find()
        .populate('_user')
        .populate('_schedule')
        .exec(function(error, data){
