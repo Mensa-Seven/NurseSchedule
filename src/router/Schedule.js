@@ -64,7 +64,36 @@ router.get('/me/present', authMiddleware, async(req, res) => {
         res.send(error)
     }
 })
- 
+
+/// ดึงวันที่มีกลุ่มที่เลือก
+router.get('/me/present/group/:id', authMiddleware, async(req, res) => {
+    const token = req.query.token || req.headers['x-access-token']
+    if(!token) return res.send({
+        message:"invalid Token"
+    })
+    try{
+        const pk = verifyToken(token)
+        const shift = await Shift.find({
+            _user:pk.user_id.sub,
+            group:req.params.id
+        })     
+        if(shift){
+            res.send({
+                data:shift
+            })
+        }else{
+            res.send({
+                message:"can't found group"
+            })
+        }
+       
+
+    }catch(error){
+        res.send(error)
+    }
+})
+
+
 // ดึงขึ้นมูล ตารางทั้งหมดที่มีของตัวเอง
 router.get('/me/all',authMiddleware, async(req, res) => {
     const token = req.query.token || req.headers['x-access-token']
