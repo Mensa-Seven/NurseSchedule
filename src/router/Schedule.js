@@ -5,6 +5,7 @@ const CreateSchedule = require("../utils/CreateSchedule.js")
 const {_, verifyToken} = require('../utils/token.js')
 const authMiddleware = require('../middlewares/auth.js')
 const Duty = require('../model/Duty.js')
+const Shift = require('../model/Shift.js')
 const router = express.Router()
 const date = new Date()
  
@@ -12,26 +13,7 @@ var dutys  = []
 
 
 /// ดึงข้อมูลงานทั้งหมด
-router.get('/all', authMiddleware, async(req, res) => {
-    const token = req.query.token || req.headers['x-access-token']
-    const pk = verifyToken(token)
-    if(!token) return res.send({
-        message:"invalid Token"
-    })
 
-    try{
-       Duty.find()
-       .populate('_user')
-       .populate('_schedule')
-       .exec(function(error, data){
-        res.send({data})
-       })
-    
-
-    }catch( error ){
-        res.send({error})
-    }
-})
 
 // สร้างตารางของเเต่ละคน จะสร้างจากเดือนปัจจุบัน
 router.post('/create', async (req, res) => {
@@ -60,21 +42,12 @@ router.get('/me/present', authMiddleware, async(req, res) => {
     })
     try{
         const pk = verifyToken(token)
-        await Duty.findOne({_user:pk.user_id.sub, month:date.getMonth()})
-        .populate({
-            path:"_user",
-            select:['frist_name', 'last_name','actor']
-        })
-        .populate({
-            path:"_schedule",
-            select:'year'
-        })
+        const duty = await Duty.findOne({_user:pk.user_id.sub, month:date.getMonth()})
+        await Shift.find({_duty:duty._id})
+        .populate('_duty')
         .exec(function(error, data){
-            res.send({
-                duty:data
-            })
+            res.send({Shift:data})
         })
-     
 
     }catch(error){
         res.send(error)
@@ -91,15 +64,6 @@ router.get('/me/all',authMiddleware, async(req, res) => {
     try{
         
         const pk = verifyToken(token)
-
-        await Duty.find({_user:pk.user_id.sub})
-        .populate('_user')
-        .populate('_schedule')
-        .exec(function(error, data){
-            res.send({
-                data:data
-            })
-        })
         
 
     }catch(error){

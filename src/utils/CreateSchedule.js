@@ -3,6 +3,7 @@ const Schedule = require('../model/Schedule.js')
 const date = new Date()
 const daysInSeptember = require('./CountDay.js')
 const Duty = require('../model/Duty.js')
+const Shift =require('../model/Shift.js')
 const CreateSchedule = async(req, res, year) => {
     try{
     const user = await User.find()
@@ -24,24 +25,26 @@ const CreateSchedule = async(req, res, year) => {
                 month:date.getMonth()
             })
             await Schedule.findByIdAndUpdate({_id:schedule._id},
-                {
-                    _duty:duty._id
-                },
-                {
-                    new:true
-                })
-            for(let m = 0;m < daysInSeptember; m++){
-               await Duty.findByIdAndUpdate({_id:duty._id}, {
+            {
                 $push:{
-                    slots:{
-                        group:"",
-                        shift1:"ว่าง",
-                        shift2:"ว่าง",
-                        shift3:"ว่าง",
-                        count:0
-                    }
+                    _duty:duty._id
                 }
-               })
+            })
+
+            for(let m = 0;m < daysInSeptember; m++){
+                //สร้างจำนวน Entity ตามจำนวนของเดือน
+                
+                await Shift.create({
+                    _duty:duty._id,
+                    day:m+1,
+                    group:"",
+                    morning:0,
+                    noon:0,
+                    night:0,
+                    count:0
+                })
+
+                console.log("User ",uid," create shift of month", duty.month, "day ",m + 1);
             }          
           
         }

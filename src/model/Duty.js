@@ -1,21 +1,22 @@
 const User = require('./User.js')
 const Schedule = require('./Schedule.js')
 const mongoose = require('mongoose')
-
 const Duty = mongoose.Schema({
     _user:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:User
+        ref:"User"
     },
     _schedule:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:Schedule
+        ref:"Schedule"
     },
     month:{
         type:String
     },
-    slots:[
-    ]
+    createAt:{
+        type:Date
+    }
+
 })
 
 module.exports = mongoose.model('Duty',Duty)
