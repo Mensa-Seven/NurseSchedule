@@ -13,4 +13,6 @@ POST /api/schedule/create
 
 * ดึงข้อมูลตารางของตัวเองในเดือนปัจุบันทั้งหมด
 GET /api/schedule/me/present (Token)
+* ดึงกลุ่มที่กำหนด
+GET /me/present/group/:id (Token)
 
