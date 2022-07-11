@@ -5,8 +5,12 @@ const Duty = require('./Duty')
 const Shift = new mongoose.Schema({
     _duty:[{
         type:mongoose.Schema.Types.ObjectId,
-        ref:Duty
+        ref:"Duty"
     }],
+    _user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"
+    },
     day:{
         type:String
     },

@@ -36,6 +36,7 @@ const CreateSchedule = async(req, res, year) => {
                 
                 await Shift.create({
                     _duty:duty._id,
+                    _user:uid,
                     day:m+1,
                     group:"",
                     morning:0,

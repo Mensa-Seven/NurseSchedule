@@ -45,6 +45,17 @@ router.get('/me/present', authMiddleware, async(req, res) => {
         const duty = await Duty.findOne({_user:pk.user_id.sub, month:date.getMonth()})
         await Shift.find({_duty:duty._id})
         .populate('_duty')
+        .populate([{
+            path:'_user',
+            select:[
+                "email",
+                "frist_name",
+                "last_name",
+                "actor",
+                'location'
+            ]
+        }
+        ])
         .exec(function(error, data){
             res.send({Shift:data})
         })
@@ -53,7 +64,7 @@ router.get('/me/present', authMiddleware, async(req, res) => {
         res.send(error)
     }
 })
-
+ 
 // ดึงขึ้นมูล ตารางทั้งหมดที่มีของตัวเอง
 router.get('/me/all',authMiddleware, async(req, res) => {
     const token = req.query.token || req.headers['x-access-token']
