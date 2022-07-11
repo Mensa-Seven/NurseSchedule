@@ -1,3 +1,3 @@
 # NurseSchedule
 * ดึงข้อมูลตารางของตัวเองในเดือนปัจุบันทั้งหมด
-/api/schedule/me/present
+GET /api/schedule/me/present
