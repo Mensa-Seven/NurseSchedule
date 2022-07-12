@@ -18,6 +18,9 @@ GET /api/schedule/me/present/group/:id (Token)
 * ดึงผลัดที่ตัวเองมีการขึ้นผลัด
 GET /api/schedule/me/present/shift (Token)
 
+* ดึงข้อมูลสมาชิกในกลุ่ม
+GET /api/group/me/member (Token)
+
 
 
 * สร้างกลุ่ม (หัวหน้าพยาบาล)
