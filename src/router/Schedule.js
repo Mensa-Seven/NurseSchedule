@@ -1,11 +1,10 @@
 const express = require('express')
-const Schedule = require('../model/Schedule.js')
 const User = require('../model/User.js')
 const CreateSchedule = require("../utils/CreateSchedule.js")
 const {_, verifyToken} = require('../utils/token.js')
 const authMiddleware = require('../middlewares/auth.js')
 const Duty = require('../model/Duty.js')
-const Shift = require('../model/Shift.js')
+const { $where } = require('../model/User.js')
 const router = express.Router()
 const date = new Date()
  
@@ -34,7 +33,7 @@ router.post('/create', async (req, res) => {
    
 })
 
-
+//ดึงข้อมูลเวรตัวเอง ในเดือนปัจจุบัน
 router.get('/me/present', authMiddleware, async(req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     if(!token) return res.send({
@@ -42,50 +41,19 @@ router.get('/me/present', authMiddleware, async(req, res) => {
     })
     try{
         const pk = verifyToken(token)
-        const duty = await Duty.findOne({_user:pk.user_id.sub, month:date.getMonth()})
-        await Shift.find({_duty:duty._id})
-        .populate('_duty')
-        .populate([{
-            path:'_user',
-            select:[
-                "email",
-                "frist_name",
-                "last_name",
-                "actor",
-                'location'
-            ]
-        }
-        ])
-        .exec(function(error, data){
-            res.send({Shift:data})
-        })
-
-    }catch(error){
-        res.send(error)
-    }
-})
-
-/// ดึงวันที่มีกลุ่มที่เลือก
-router.get('/me/present/group/:id', authMiddleware, async(req, res) => {
-    const token = req.query.token || req.headers['x-access-token']
-    if(!token) return res.send({
-        message:"invalid Token"
-    })
-    try{
-        const pk = verifyToken(token)
-        const shift = await Shift.find({
+        const duty = await Duty.find(
+            {
             _user:pk.user_id.sub,
-            group:req.params.id
-        })     
-        if(shift){
-            res.send({
-                data:shift
-            })
-        }else{
-            res.send({
-                message:"can't found group"
-            })
-        }
+            year:date.getFullYear(),
+            month:date.getMonth()
+        })
+        .populate({
+            path:'_user',
+            select:['frist_name', 'last_name', 'actor']
+        })
+        .exec(function(error, data){
+            res.send({Duty:data}) 
+        })
        
 
     }catch(error){
@@ -94,22 +62,72 @@ router.get('/me/present/group/:id', authMiddleware, async(req, res) => {
 })
 
 
-// ดึงขึ้นมูล ตารางทั้งหมดที่มีของตัวเอง
-router.get('/me/all',authMiddleware, async(req, res) => {
+/// ดึงวันที่มีกลุ่มที่เลือก ของปีเเละเดือนปัจจุบัน
+router.get('/me/present/group/:id', authMiddleware, async(req, res) => {
+    const token = req.query.token || req.headers['x-access-token']
+    if(!token) return res.send({
+        message:"invalid Token"
+    })
+    try{
+        const pk = verifyToken(token)
+        const uid = pk.user_id.sub
+        const duty = await Duty.find({
+            _user:uid,
+            year:date.getFullYear(),
+            month:date.getMonth(),
+            group:req.params.id
+        })
+        if(duty.length !==0){
+            res.send({data:duty})
+        }
+        else{
+            res.send({
+                message:"ไม่พบกลุ่มดังกล่าว"
+            })
+        }
+    }catch(error){
+        res.send(error)
+    }
+})
+// ในเดือนเเละปีปัจจุบัน ที่มีการขึ้นเวร
+router.get('/me/present/shift', authMiddleware, async(req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     if(!token) return res.send({
         message:"invalid Token"
     })
 
     try{
-        
         const pk = verifyToken(token)
-        
+        const uid = pk.user_id.sub
+    
+        await Duty.find({
+            _user:uid,
+            year:date.getFullYear(),
+            month:date.getMonth(),
+            count:{
+                $gt:0
+            }
+        })
+        .populate('_user')
+        .exec(function(error, data){
+           if(data.length !==0){
+            res.send({
+                duty:data
+            })
+           }else{
+            res.send({
+                message:"ไม่มีการขึ้นผลัด"
+            })
+           }
+        })
+       
 
     }catch(error){
-
+        res.send({err:error})
     }
 })
+
+
 
 /// ดึงข้อมูลตารางข้อง user เฉพราะกลุ่ม ตาม id เเละเดือน
 router.get('/me/month', authMiddleware, async(req, res) => {

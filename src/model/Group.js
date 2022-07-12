@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const User = require('./User.js')
-const schedule = require('./Schedule.js')
 const Duty = require('./Duty.js')
 
 const Group = new mongoose.Schema({

@@ -1,22 +1,36 @@
-const User = require('./User.js')
-const Schedule = require('./Schedule.js')
 const mongoose = require('mongoose')
-const Duty = mongoose.Schema({
+
+
+const Duty = new mongoose.Schema({
     _user:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
     },
-    _schedule:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Schedule"
+    year:{
+        type:String
     },
     month:{
         type:String
     },
-    createAt:{
-        type:Date
+    day:{
+        type:String
+    },
+    group:{
+        type:String
+    },
+    morning:{
+        type:Number
+    },
+    noon:{
+        type:Number
+    },
+    night:{
+        type:Number
+    },
+    count:{
+        type:Number
     }
 
 })
 
-module.exports = mongoose.model('Duty',Duty)
+module.exports = mongoose.model('Duty', Duty)

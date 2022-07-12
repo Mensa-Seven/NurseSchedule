@@ -1,5 +1,4 @@
 const express = require('express')
-const Schedule = require('../model/Schedule.js')
 const User = require('../model/User.js')
 const CreateSchedule = require("../utils/CreateSchedule.js")
 const {_, verifyToken} = require('../utils/token.js')
@@ -21,33 +20,10 @@ router.post('/create',authMiddleware,  async(req, res) => {
     const pk = verifyToken(token)
     
     try{
-        await Schedule.find({_user:pk.user_id.sub, year:date.getFullYear()})
-        .populate('_user')
-        .populate('_duty')
-        .exec(async function(eroor, data){
-
-            if(data[0]._user.actor === 'หัวหน้าพยาบาล'){
-                
-                await Group.create({
-                    title:req.body.title,
-                    leader:`${data[0]._user.frist_name}` + ` ${data[0]._user.last_name}`,
-                    user:data[0]._user._id,
-                    schedule:data[0]._duty[0]
-
-                })
-                .then(data => {
-                    res.send({data:data})
-                })
-
-        }
-        else{
-            res.send({
-                message:"ไม่สามารถสร้างกลุ่มได้ เนื่องจากคุณไม่ใช่หัวหน้า"
-            })
-        }
-            
-            
-        })
+        const user = await User.findById(pk.user_id.sub)
+        const location = user.location
+        const actor = user.actor
+        
        
     }catch( error ){
         res.send({error})
@@ -61,19 +37,23 @@ router.get('/me', authMiddleware, async(req, res) => {
     
     try{
         await Group.find({
-            title:"1234",
+            _user:pk.user_id.sub
 
         })
-        .populate('user')
-        .populate('schedule')
+        .populate('_user')
+        .populate('_schedule')
         .exec(function(error ,data){
-            res.send(data)
+            
         })
+
     }catch(error ){
 
         res.send({error})
     }
 })
+
+
+
 router.put('addmember', authMiddleware, async(req, res) => {
     
     try{

@@ -1,42 +1,29 @@
 const User = require('../model/User.js')
-const Schedule = require('../model/Schedule.js')
 const date = new Date()
 const daysInSeptember = require('./CountDay.js')
 const Duty = require('../model/Duty.js')
-const Shift =require('../model/Shift.js')
+
+// เป็นฟังก์ชัน สร้าง ตารางของ User ทั้งหมด
 const CreateSchedule = async(req, res, year) => {
     try{
     const user = await User.find()
     for(let i = 0; i< user.length; i++ ){
         //เช็คว่ามีข้อมูลของ ตารางของปีนี้หรือยัง
        var uid = user[i]._id
-       const check =  await Schedule.findOne({
+       const check =  await Duty.findOne({
             _user:uid,
             year:year
         })
+        /// case ที่ไม่มี จะทำการสร้าง ตารางประจำปีขึ้นมา
         if(check === null){
-            const schedule = await Schedule.create({
-                _user:uid,
-                year:year
-            })
-            const duty = await Duty.create({
-                _user:uid,
-                _schedule:schedule._id,
-                month:date.getMonth()
-            })
-            await Schedule.findByIdAndUpdate({_id:schedule._id},
-            {
-                $push:{
-                    _duty:duty._id
-                }
-            })
 
+    
             for(let m = 0;m < daysInSeptember; m++){
                 //สร้างจำนวน Entity ตามจำนวนของเดือน
-                
-                await Shift.create({
-                    _duty:duty._id,
+                const duty = await Duty.create({
                     _user:uid,
+                    year:year,
+                    month:date.getMonth(),
                     day:m+1,
                     group:"",
                     morning:0,
