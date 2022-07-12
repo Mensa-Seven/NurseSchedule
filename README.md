@@ -16,7 +16,7 @@ GET /api/schedule/me/present (Token)
 * ดึงกลุ่มที่กำหนด
 GET /api/schedule/me/present/group/:id (Token)
 * ดึงผลัดที่ตัวเองมีการขึ้นผลัด
-GET /api/shedule/me/present/shift (Token)
+GET /api/schedule/me/present/shift (Token)
 
 
 
