@@ -4,19 +4,18 @@ const Duty = require('./Duty.js')
 
 const Group = new mongoose.Schema({
     title:{type:String},
-    leader:{type:String},
-    user:[
+    _leader:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User'
+    }],
+    location:{type:String},
+    _member:[
         {
             type:mongoose.Schema.Types.ObjectId,
-            ref:User
+            ref:"User"
         }
     ]
-    ,
-    schedule:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:Duty
-    }]
-
 })
+
 
 module.exports = mongoose.model('Group', Group)

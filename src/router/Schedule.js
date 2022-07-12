@@ -120,7 +120,6 @@ router.get('/me/present/shift', authMiddleware, async(req, res) => {
             })
            }
         })
-       
 
     }catch(error){
         res.send({err:error})
