@@ -8,7 +8,7 @@ const startServer = async () => {
 
     // รอการเชื่อมต่อ database
 	await connecting()
-	await wait(2000) 
+	await wait(1000) 
 	
 	// หลังจากการเชื่อมต่อ database เสร็จสิ้นก็นให้ทำการเริ่มรัน server
 	app.listen(PORT, "0.0.0.0", () => {
