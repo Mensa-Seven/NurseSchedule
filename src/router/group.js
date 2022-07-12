@@ -5,6 +5,7 @@ const {_, verifyToken} = require('../utils/token.js')
 const authMiddleware = require('../middlewares/auth.js')
 const Duty = require('../model/Duty.js')
 const Group = require('../model/Group.js')
+const ScheduleGroup = require('../model/ScheduleGroup.js')
 const router = express.Router()
 const date = new Date()
  
@@ -14,6 +15,9 @@ router.get('/test', (req,res) => {
     res.send({message:"Hello"})
 })
 
+
+
+
 /// ดึงสมาชิกใน Group 
 router.get('/me/member', authMiddleware, async(req, res) => {
     const token = req.query.token || req.headers['x-access-token']
@@ -21,23 +25,31 @@ router.get('/me/member', authMiddleware, async(req, res) => {
     const uid = pk.user_id.sub
 
     try{
+
+        const duty = await Duty.find({
+          _user:uid,
+          year:date.getFullYear(),
+          month:date.getMonth()  
+        })
+        res.send(duty)
+
         await Group.find({_member:uid})
         .populate([
             {
                 path:'_leader',
-                select:['frist_name', 'last_name', 'location', 'actor']
+                select:['frist_name', 'last_name', 'location', 'actor', 'email']
             }
         ])
         .populate([
             {
                 path:'_member',
-                select:['frist_name', 'last_name', 'actor']
+                select:['frist_name', 'last_name', 'actor', 'email']
             }
         ])
         .exec(function(error, data){
+            
             res.send({group:data})
         })
-
 
     }catch(error){
         res.send({
@@ -46,12 +58,24 @@ router.get('/me/member', authMiddleware, async(req, res) => {
     }
 })
 
+
+
+
 router.post('/create',authMiddleware,  async(req, res) => {
 
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
+    const uid = pk.user_id.sub
     
     try{
+
+        const duty = await Duty.find({
+            _user:uid,
+            year:date.getFullYear(),
+            month:date.getMonth()  
+          })
+
+
         const user = await User.findById(pk.user_id.sub)
         const location = user.location
         const actor = user.actor
@@ -60,19 +84,27 @@ router.post('/create',authMiddleware,  async(req, res) => {
         if(group.length !==0 ) res.send({message:"ID นี้มีการสร้างเป็น Group เเล้ว"})
         
         await Group.create({
-            title:req.body.title,
+            name_group:req.body.name_group,
             _leader:user._id,
             _member:user._id
         })
-        .then(async(error, data) => {
+        .then(async(data) => {
+            await duty.forEach( async element => {
+                await ScheduleGroup.create({
+                    _group:data._id,
+                    _user:user._id,
+                    _duty:element._id
+                })
+            })
             res.send({group:data})
         })
 
-       
     }catch( error ){
         res.send({error})
     }
 })
+
+
 
 
 router.get('/me', authMiddleware, async(req, res) => {

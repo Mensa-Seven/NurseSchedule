@@ -3,7 +3,7 @@ const User = require('./User.js')
 const Duty = require('./Duty.js')
 
 const Group = new mongoose.Schema({
-    title:{type:String},
+    name_group:{type:String},
     _leader:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
