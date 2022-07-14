@@ -27,5 +27,5 @@ PATCH /api/group/me/present/group/:id
 
 * สร้างกลุ่ม (หัวหน้าพยาบาล)
 * POST /api/group/create 
-  Body title String
+  Body name_group String
   
