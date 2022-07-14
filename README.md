@@ -21,8 +21,7 @@ GET /api/schedule/me/present/shift (Token)
 * ดึงข้อมูลสมาชิกในกลุ่ม
 GET /api/group/me/member (Token)
 * สร้างตารางอัตโนมัติ ให้กับสมาชิกภายในกลุ่ม
-PATCH /api/group/me/present/group/:id 
-
+PATCH /api/group/create/auto/:groupId
 
 
 * สร้างกลุ่ม (หัวหน้าพยาบาล)
