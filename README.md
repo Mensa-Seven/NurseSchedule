@@ -6,7 +6,7 @@ POST /api/auth/login
 * สมัครสมาชิก
 POST /api/auth/register
 * ออกจากระบบ
-DELETE /api/auth/logout
+DELETE /api/auth/logout (Token)
 
 * สร้างตารางเวรทั้งหมด
 POST /api/schedule/create
