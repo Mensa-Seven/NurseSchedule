@@ -21,7 +21,7 @@ router.get('/test', (req, res) => {
 router.patch("/create/auto/:groupId", async (req, res) => {
 
     const year = date.getFullYear().toString()
-    const { groupId } = req.params
+    const { groupId } = req.params || req.body
 
     if (!groupId) return res.send("Invalid group id")
 
@@ -149,24 +149,13 @@ router.get('/schedule/without/me', authMiddleware, async (req, res) => {
 
     try {
         await ScheduleGroup.find({
-            _user: {
-                $gt: uid
-            }
+            _user:uid
         })
-            .populate([
-                {
-                    path: "_user",
-                    select: ['frist_name', 'last_name', 'location', 'actor', 'email']
-                }
-            ])
-            .populate([{
-                path: '_group',
-                select: ['name_group']
-            }])
-            .populate('_duty')
-            .exec(function (error, data) {
-                res.send({ duty: data })
-            })
+        .populate('_user')
+        .populate('_duty')
+        .exec(function (error, data) {
+            res.send({ duty: data })
+        })
 
     } catch (error) {
         res.send(error)
