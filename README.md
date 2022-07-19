@@ -22,6 +22,9 @@ GET /api/schedule/me/present/shift (Token)
 GET /api/group/me/member (Token)
 * สร้างตารางอัตโนมัติ ให้กับสมาชิกภายในกลุ่ม
 PATCH /api/group/create/auto/:groupId
+* ดึงสมาชิกที่อยู่ในโรงพยาบาลของตัวเอง (ไม่มีฉัน)
+GET /api/group/list/member/location
+
 
 
 * สร้างกลุ่ม (หัวหน้าพยาบาล)
