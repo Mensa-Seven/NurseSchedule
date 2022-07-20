@@ -176,37 +176,99 @@ router.get('/schedule/wihout/me', authMiddleware, async (req, res) => {
         })
     }
 })
+
+router.get('/list/member/location', authMiddleware, async(req, res) => {
+    const token = req.query.token || req.headers['x-access-token']
+    const pk = verifyToken(token)
+    const uid = pk.user_id.sub
+    try{
+        await User.findById(uid)
+        .then(async function(data, error){
+            //ใช้ค้นหา User เพื่อเอา location
+        
+            await User.find({
+                _id:{
+                    $gt:data._id
+                },
+                location:data.location
+            })
+            .then(async function(data, error){
+                if(data){
+                    res.send({data:data})
+                }else{
+                    res.send({message:"ไม่พบสมาชิก"})
+                }
+
+            })
+        })
+        .catch(err => {
+            console.log(err);
+        })
+
+    }catch(error){
+        res.send({error})
+    }
+})
+
 /// ของหัวหน้าพยาบาล เพิ่มสมาชิกในโรงพยาบาลลงกลุ่มตัวเอง
 
 router.put('/addmember', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
+    
+    try{
+        if(!req.body.email) return res.send({message:"ไม่ได้กำหนด email"})
+        if(!req.body.name_group) return res.send({message:"ไม่ได้กำหนด name_group"})
+        const leader = await User.findById(uid)
+        const user = await User.findOne({email:req.body.email, location:leader.location})
+        const group = await Group.findOne({name_group:req.body.name_group, location:leader.location})
+        // ค้นว่าพบข้อมูล กลุ่มหรือไม่
+        if(!group) return res.send({message:"ไม่พบข้อมูล"}) 
+        if(!user) return res.send({message:"ไม่สามารถเพิ่มสมาชิกได้"})
+        
+        const findGroup = await Group.findOne({_id:group._id, _member:user._id})
+        if(findGroup){
+            res.send({message:"ผู้ใช้งานนี้อยู่ในหวอดอยู่เเล้ว"})
+        }else{
 
-    try {
-        const user = await User.findById(uid)
-        const location = user.location
-        const actor = user.actor
+            await Group.findOneAndUpdate({_id:group._id},
+                {
+                    $push:{
+                        _member:user._id
+                    }
+                })
+                .then(async() => {
+                const duty = await Duty.find({
+                    _user: user._id,
+                    year: date.getFullYear(),
+                    month: date.getMonth()
+                })
+                
+                await duty.forEach(async element => {
+                        await ScheduleGroup.create({
+                            _group: group._id,
+                            _user: user._id,
+                            _duty: element._id
+                        })
+                    })
 
-        if (actor !== 'หัวหน้าพยาบาล') return res.send({ message: "คุณไม่ใช่หัวหน้าพยาบาลไม่สามารถใช้คำสั่งนี้ได้" })
-        const member = await User.findOne({ email: req.body.email })
-        await Group.findOneAndUpdate({
-            name_group: req.body.name_group,
-            _leader: uid
-        },
+                })
 
-            {
-                $push: {
-                    _member: member._id
-                }
-            })
+           
 
+                res.send({message:"Success"})
+        }
 
+        
 
-    } catch (error) {
+    }catch(error){
         res.send(error)
     }
+
 })
+
+
 
 router.post('/create', authMiddleware, async (req, res) => {
 
@@ -253,9 +315,6 @@ router.post('/create', authMiddleware, async (req, res) => {
         res.send({ error })
     }
 })
-
-
-
 
 router.get('/me', authMiddleware, async (req, res) => {
 

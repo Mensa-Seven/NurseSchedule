@@ -9,6 +9,7 @@ const Group = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
     }],
+    
     _member:[
         {
             type:mongoose.Schema.Types.ObjectId,
