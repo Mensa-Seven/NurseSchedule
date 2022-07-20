@@ -24,6 +24,7 @@ GET /api/group/me/member (Token)
 PATCH /api/group/create/auto/:groupId
 * ดึงสมาชิกที่อยู่ในโรงพยาบาลของตัวเอง (ไม่มีฉัน)
 GET /api/group/list/member/location
+GET /api/group/schedule/without/me (Tone)
 
 
 
