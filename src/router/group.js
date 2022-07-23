@@ -105,16 +105,12 @@ router.patch("/create/auto/:groupId", async (req, res) => {
 
 })
 
-/// ดึงสมาชิกใน Group 
 router.get('/me/member', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
 
     try {
-
-
-
 
         await Group.find({ _member: uid })
             .populate([
@@ -141,6 +137,9 @@ router.get('/me/member', authMiddleware, async (req, res) => {
     }
 })
 
+
+
+
 /// ดึงข้อมูลตารงทั้งหมดที่เราอยู่ในกลุ่ม
 router.get('/schedule/without/me', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
@@ -162,14 +161,31 @@ router.get('/schedule/without/me', authMiddleware, async (req, res) => {
     }
 })
 
-router.get('/schedule/wihout/me', authMiddleware, async (req, res) => {
+router.get('/schedule/me/all', authMiddleware, async (req, res) => {
 
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
 
-    try {
 
+    try {
+        const leader = await User.findById(uid)
+        console.log(uid);
+        const group = await Group.findOne({
+            _member:uid,
+            location:leader.location,
+            name_group:req.body.name_group
+            
+        })
+        console.log(group._id);
+        const schdule = await ScheduleGroup.find({_group:group._id})
+        .populate('_duty')
+        .populate('_user')
+        .exec(function(error, data){
+            res.send(data)
+        })
+            
+        
     } catch (error) {
         res.send({
             error: error
@@ -268,6 +284,54 @@ router.put('/addmember', authMiddleware, async (req, res) => {
 
 })
 
+router.delete('/me/remove', authMiddleware, async (req, res) => {
+    const token = req.query.token || req.headers['x-access-token']
+    const pk = verifyToken(token)
+    const uid = pk.user_id.sub
+
+    try{
+        const leader = await User.findById(uid)
+        const user = await User.findOne({email:req.body.email, location:leader.location})
+        const group = await Group.findOne({name_group:req.body.name_group, location:leader.location})
+        
+       console.log(group);
+       console.log(user);
+       const updateGroup = await Group.findOneAndUpdate({_id:group._id, _member:user._id},
+        {
+            $pull:{
+                _member:user._id
+            }
+        })
+        .then(async ( ) => {
+            const dutys = await Duty.find({
+                _user: uid,
+                year: date.getFullYear(),
+                month: date.getMonth(),
+                group:req.body.name_group
+            })
+
+            await Promise.all(dutys.map((duty) => Duty.updateOne({
+                $and: [
+                    {
+                        _user: duty._user
+                    },
+                    {
+                        day: duty.day
+                    },
+                    {
+                        year: year
+                    }
+                ]
+            }, { $set: duty })))
+        
+        })
+
+    }catch(error){
+        res.send(error)
+    }
+
+})
+
 
 
 router.post('/create', authMiddleware, async (req, res) => {
@@ -336,25 +400,6 @@ router.get('/me', authMiddleware, async (req, res) => {
 
         res.send({ error })
     }
-})
-
-
-
-router.put('addmember', authMiddleware, async (req, res) => {
-
-    try {
-
-
-
-
-
-
-    } catch (error) {
-        res.send(error)
-    }
-
-
-
 })
 
 module.exports = router
