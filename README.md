@@ -26,6 +26,9 @@ PATCH /api/group/create/auto/:groupId
 GET /api/group/list/member/location
 * ดึงข้อมูลตารางสมาชิกที่เเล้ว เเละอยู่ในโณงพยาบาลกับเรา ออกมา (ไม่มีเรา)
 GET /api/group/schedule/without/me (Tone)
+* ดึงข้อมูลสมาชิกทั้งหมดที่อยู่ในกลุ่มเรา 
+GET /api/group/schedule/me/all (Token) 
+  - Body: name_group
 
 
 
