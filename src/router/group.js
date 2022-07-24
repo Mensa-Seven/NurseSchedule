@@ -161,7 +161,7 @@ router.get('/schedule/without/me', authMiddleware, async (req, res) => {
     }
 })
 
-router.get('/schedule/me/all', authMiddleware, async (req, res) => {
+router.get('/schedule/me/all/:name_group', authMiddleware, async (req, res) => {
 
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
@@ -170,11 +170,10 @@ router.get('/schedule/me/all', authMiddleware, async (req, res) => {
 
     try {
         const leader = await User.findById(uid)
-        console.log(uid);
         const group = await Group.findOne({
             _member:uid,
             location:leader.location,
-            name_group:req.body.name_group
+            name_group:req.params.name_group
             
         })
         console.log(group._id);
@@ -232,6 +231,7 @@ router.put('/addmember', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
+    const duties = []
     
     try{
         if(!req.body.email) return res.send({message:"ไม่ได้กำหนด email"})
@@ -255,19 +255,31 @@ router.put('/addmember', authMiddleware, async (req, res) => {
                     }
                 })
                 .then(async() => {
-                const duty = await Duty.find({
-                    _user: user._id,
-                    year: date.getFullYear(),
-                    month: date.getMonth()
-                })
-                
-                await duty.forEach(async element => {
-                        await ScheduleGroup.create({
-                            _group: group._id,
-                            _user: user._id,
-                            _duty: element._id
-                        })
+                    await ScheduleGroup.create({
+                        _group: group._id,
+                        _user: user._id,
                     })
+
+                    const duty = await Duty.find({
+                        _user: user._id,
+                        year: date.getFullYear(),
+                        month: date.getMonth()
+                    })
+                    
+                    await duty.forEach(async element => {
+                            duties.push(element._id)
+                        })
+                    
+                        await ScheduleGroup.updateOne({
+                            $and:[
+                                {
+                                    _group:group._id
+                                },
+                                {
+                                    _user:user._id
+                                }
+                            ]
+                        }, {$push:{ _duty:duties}} )
 
                 })
 
@@ -339,6 +351,7 @@ router.post('/create', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
+    const duties = []
 
     try {
 
@@ -365,13 +378,25 @@ router.post('/create', authMiddleware, async (req, res) => {
             location: location
         })
             .then(async (data) => {
-                await duty.forEach(async element => {
-                    await ScheduleGroup.create({
-                        _group: data._id,
-                        _user: user._id,
-                        _duty: element._id
-                    })
+                await ScheduleGroup.create({
+                    _group: data._id,
+                    _user: user._id,
                 })
+                await duty.forEach(async element => {
+                    duties.push(element._id)
+                })
+                await ScheduleGroup.updateOne({
+                    $and:[
+                        {
+                            _group:data._id
+                        },
+                        {
+                            _user:user._id
+                        }
+                    ]
+                }, {$push:{ _duty:duties}} )
+             
+
                 res.send({ group: data })
             })
 
@@ -379,6 +404,19 @@ router.post('/create', authMiddleware, async (req, res) => {
         res.send({ error })
     }
 })
+// await Promise.all(duties.map((duty) => Duty.updateOne({
+//     $and: [
+//         {
+//             _user: duty._user
+//         },
+//         {
+//             day: duty.day
+//         },
+//         {
+//             year: year
+//         }
+//     ]
+// }, { $set: duty })))
 
 router.get('/me', authMiddleware, async (req, res) => {
 
