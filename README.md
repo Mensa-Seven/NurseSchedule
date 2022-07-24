@@ -28,7 +28,7 @@ GET /api/group/list/member/location
 GET /api/group/schedule/without/me (Tone)
 * ดึงข้อมูลสมาชิกทั้งหมดที่อยู่ในกลุ่มเรา 
 GET /api/group/schedule/me/all (Token) 
-  - Body: name_group
+  - params: name_group
 
 
 
