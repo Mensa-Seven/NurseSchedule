@@ -97,6 +97,9 @@ router.patch("/create/auto/:groupId", async (req, res) => {
             },
             {
                 year: year
+            },
+            {
+                month:date.getMonth() + 1
             }
         ]
     }, { $set: duty })))
@@ -263,7 +266,7 @@ router.put('/addmember', authMiddleware, async (req, res) => {
                     const duty = await Duty.find({
                         _user: user._id,
                         year: date.getFullYear(),
-                        month: date.getMonth()
+                        month: date.getMonth() +1
                     })
                     
                     await duty.forEach(async element => {
@@ -318,7 +321,7 @@ router.delete('/me/remove', authMiddleware, async (req, res) => {
             const dutys = await Duty.find({
                 _user: uid,
                 year: date.getFullYear(),
-                month: date.getMonth(),
+                month: date.getMonth() +1 ,
                 group:req.body.name_group
             })
 
@@ -358,7 +361,7 @@ router.post('/create', authMiddleware, async (req, res) => {
         const duty = await Duty.find({
             _user: uid,
             year: date.getFullYear(),
-            month: date.getMonth()
+            month: date.getMonth() + 1
         })
 
 

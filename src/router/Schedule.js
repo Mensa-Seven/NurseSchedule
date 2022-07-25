@@ -45,7 +45,7 @@ router.get('/me/present', authMiddleware, async(req, res) => {
             {
             _user:pk.user_id.sub,
             year:date.getFullYear(),
-            month:date.getMonth()
+            month:date.getMonth() +1
         })
         .populate({
             path:'_user',
@@ -74,7 +74,7 @@ router.get('/me/present/group/:id', authMiddleware, async(req, res) => {
         const duty = await Duty.find({
             _user:uid,
             year:date.getFullYear(),
-            month:date.getMonth(),
+            month:date.getMonth() +1,
             group:req.params.id
         })
         if(duty.length !==0){
@@ -89,6 +89,7 @@ router.get('/me/present/group/:id', authMiddleware, async(req, res) => {
         res.send(error)
     }
 })
+
 // ในเดือนเเละปีปัจจุบัน ที่มีการขึ้นเวร
 router.get('/me/present/shift', authMiddleware, async(req, res) => {
     const token = req.query.token || req.headers['x-access-token']
@@ -103,7 +104,7 @@ router.get('/me/present/shift', authMiddleware, async(req, res) => {
         await Duty.find({
             _user:uid,
             year:date.getFullYear(),
-            month:date.getMonth(),
+            month:date.getMonth() + 1,
             count:{
                 $gt:0
             }
@@ -155,4 +156,5 @@ router.get('/me/month', authMiddleware, async(req, res) => {
     }
 
 })
+
 module.exports = router
