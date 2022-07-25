@@ -13,6 +13,8 @@ POST /api/schedule/create
 
 * ดึงข้อมูลตารางของตัวเองในเดือนปัจุบันทั้งหมด
 GET /api/schedule/me/present (Token)
+* ดึงข้อมูลเวลทั้งหมด
+GET /api/schedule/me/all (Token)
 * ดึงกลุ่มที่กำหนด
 GET /api/schedule/me/present/group/:id (Token)
 * ดึงผลัดที่ตัวเองมีการขึ้นผลัด
