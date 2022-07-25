@@ -151,10 +151,12 @@ router.get('/schedule/without/me', authMiddleware, async (req, res) => {
 
     try {
         await ScheduleGroup.find({
-            _user:uid
+            _user:{
+                $gt:uid
+            }
         })
-        .populate('_user')
         .populate('_duty')
+        .populate('_user')
         .exec(function (error, data) {
             res.send({ duty: data })
         })
