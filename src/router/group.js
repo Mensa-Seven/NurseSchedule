@@ -173,7 +173,7 @@ router.get('/schedule/me/all/:name_group', authMiddleware, async (req, res) => {
         const group = await Group.findOne({
             _member:uid,
             location:leader.location,
-            name_group:req.params.name_group
+            name_group:req.params.name_group || req.body.name_group
             
         })
         console.log(group._id);
