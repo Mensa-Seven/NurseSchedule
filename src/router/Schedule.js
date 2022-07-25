@@ -60,6 +60,32 @@ router.get('/me/present', authMiddleware, async(req, res) => {
         res.send(error)
     }
 })
+router.get('/me/all', authMiddleware, async(req, res) => {
+    const token = req.query.token || req.headers['x-access-token']
+    if(!token) return res.send({
+        message:"invalid Token"
+    })
+    try{
+
+        const pk = verifyToken(token)
+        const duty = await Duty.find(
+            {
+            _user:pk.user_id.sub,            
+        })
+        .populate({
+            path:'_user',
+            select:['frist_name', 'last_name', 'actor']
+        })
+        .exec(function(error, data){
+            res.send({Duty:data}) 
+        })
+       
+
+    }catch(error){
+        res.send(error)
+    }
+})
+
 
 
 /// ดึงวันที่มีกลุ่มที่เลือก ของปีเเละเดือนปัจจุบัน
@@ -135,6 +161,7 @@ router.get('/me/month', authMiddleware, async(req, res) => {
     if(!token) return res.send({
         message:"invalidit Token"
     })
+    
     try{
 
         const pk = verifyToken(token)
