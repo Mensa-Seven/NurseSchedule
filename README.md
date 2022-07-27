@@ -22,6 +22,8 @@ GET /api/schedule/me/present/shift (Token)
 
 * ดึงข้อมูลสมาชิกในกลุ่ม
 GET /api/group/me/member (Token)
+* สร้างกลุ่ม
+POST /api/group/create (Token)
 * สร้างตารางอัตโนมัติ ให้กับสมาชิกภายในกลุ่ม
 PATCH /api/group/create/auto/:groupId
 * ดึงสมาชิกที่อยู่ในโรงพยาบาลของตัวเอง (ไม่มีฉัน)
