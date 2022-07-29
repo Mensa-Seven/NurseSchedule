@@ -6,7 +6,7 @@ const authMiddleware = require('../middlewares/auth.js')
 const Duty = require('../model/Duty.js')
 const Group = require('../model/Group.js')
 const ScheduleGroup = require('../model/ScheduleGroup.js')
-const { findById } = require('../model/User.js')
+const { findById, find } = require('../model/User.js')
 const router = express.Router()
 const date = new Date()
 const runPy = require("../utils/runPy.js")
@@ -148,12 +148,18 @@ router.get('/schedule/without/me', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
+    const user = await User.findById(uid)
+    const listMember = []
+    const location = await User.find({location:user.location})
+    location.forEach(element => listMember.push(element._id))
 
     try {
         await ScheduleGroup.find({
             _user:{
                 $gt:uid
-            }
+            },
+            location:location
+            
         })
         .populate('_duty')
         .populate('_user')
@@ -288,8 +294,7 @@ router.put('/addmember', authMiddleware, async (req, res) => {
 
                 })
 
-           
-
+        
                 res.send({message:"Success"})
         }
 
@@ -446,4 +451,3 @@ router.get('/me', authMiddleware, async (req, res) => {
 })
 
 module.exports = router
-
