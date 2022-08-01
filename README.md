@@ -19,6 +19,9 @@ GET /api/schedule/me/all (Token)
 GET /api/schedule/me/present/group/:id (Token)
 * ดึงผลัดที่ตัวเองมีการขึ้นผลัด
 GET /api/schedule/me/present/shift (Token)
+GET /api/schedule/me/all/ (Token)
+  -body: name_group
+  -params: name_group
 
 * ดึงข้อมูลสมาชิกในกลุ่ม
 GET /api/group/me/member (Token)
@@ -32,6 +35,9 @@ PUT /api/group/addmember (Token)
   
 * สร้างตารางอัตโนมัติ ให้กับสมาชิกภายในกลุ่ม
 PATCH /api/group/create/auto/:groupId
+* ดึง ข้อมูลกลุ่มทั้งหมด ที่เราอยู่ในกลุ่มนั้น
+GET /api/group/list/me/all (Token)
+
 * ดึงสมาชิกที่อยู่ในโรงพยาบาลของตัวเอง (ไม่มีฉัน)
 GET /api/group/list/member/location
 * ดึงข้อมูลตารางสมาชิกที่เเล้ว เเละอยู่ในโณงพยาบาลกับเรา ออกมา (ไม่มีเรา)
