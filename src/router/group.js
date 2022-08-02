@@ -6,7 +6,7 @@ const authMiddleware = require('../middlewares/auth.js')
 const Duty = require('../model/Duty.js')
 const Group = require('../model/Group.js')
 const ScheduleGroup = require('../model/ScheduleGroup.js')
-const { findById, find } = require('../model/User.js')
+const { findById, find, populate } = require('../model/User.js')
 const router = express.Router()
 const date = new Date()
 const runPy = require("../utils/runPy.js")
@@ -107,6 +107,21 @@ router.patch("/create/auto/:groupId", async (req, res) => {
     res.send("Success")
 
 })
+router.get('/list/me/all', authMiddleware, async (req, res) => {
+    const token = req.query.token || req.headers['x-access-token']
+    const pk = verifyToken(token)
+    const uid = pk.user_id.sub
+
+    try{
+        await Group.find({ _member:uid})
+        .then(async function(data){
+            res.send(data)
+        })
+
+    }catch(error){
+        res.send(error)
+    }
+})
 
 router.get('/me/member', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
@@ -139,8 +154,6 @@ router.get('/me/member', authMiddleware, async (req, res) => {
         })
     }
 })
-
-
 
 
 /// ดึงข้อมูลตารงทั้งหมดที่เราอยู่ในกลุ่ม

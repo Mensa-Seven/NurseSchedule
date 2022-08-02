@@ -5,6 +5,9 @@ const {_, verifyToken} = require('../utils/token.js')
 const authMiddleware = require('../middlewares/auth.js')
 const Duty = require('../model/Duty.js')
 const { $where } = require('../model/User.js')
+const Group = require('../model/Group.js')
+const ScheduleGroup = require('../model/ScheduleGroup.js')
+
 const router = express.Router()
 const date = new Date()
  
@@ -60,7 +63,8 @@ router.get('/me/present', authMiddleware, async(req, res) => {
         res.send(error)
     }
 })
-router.get('/me/all', authMiddleware, async(req, res) => {
+router.get('/me/all/:name_group', authMiddleware, async(req, res) => {
+    const {name_group} = req.body.name_group || req.params
     const token = req.query.token || req.headers['x-access-token']
     if(!token) return res.send({
         message:"invalid Token"
@@ -68,17 +72,19 @@ router.get('/me/all', authMiddleware, async(req, res) => {
     try{
 
         const pk = verifyToken(token)
-        const duty = await Duty.find(
-            {
-            _user:pk.user_id.sub,            
+        const uid = pk.user_id.sub
+        const user = await User.findById(uid)
+        
+        const group = await Group.findOne({_member:user._id, location:user.location, name_group:name_group})
+        await ScheduleGroup.find({_group:group._id})
+        .populate('_group')
+        .populate('_user')
+        .populate('_duty')
+        .exec(async function(error, data){
+            res.send({schedule:data})
         })
-        .populate({
-            path:'_user',
-            select:['frist_name', 'last_name', 'actor']
-        })
-        .exec(function(error, data){
-            res.send({Duty:data}) 
-        })
+
+        
        
 
     }catch(error){
