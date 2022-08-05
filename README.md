@@ -20,8 +20,8 @@ GET /api/schedule/me/present/group/:id (Token)
 * ดึงผลัดที่ตัวเองมีการขึ้นผลัด
 GET /api/schedule/me/present/shift (Token)
 GET /api/schedule/me/all/ (Token)
-  -body: name_group
-  -params: name_group
+  -body name_group
+  -params name_group
 
 * ดึงข้อมูลสมาชิกในกลุ่ม
 GET /api/group/me/member (Token)
