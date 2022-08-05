@@ -19,6 +19,7 @@ GET /api/schedule/me/all (Token)
 GET /api/schedule/me/present/group/:id (Token)
 * ดึงผลัดที่ตัวเองมีการขึ้นผลัด
 GET /api/schedule/me/present/shift (Token)
+* ดึงตารางของกลุ่มตัวเองอยู่ขึ้นมา 
 GET /api/schedule/me/all/ (Token)
   - body name_group
   - params name_group
