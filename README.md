@@ -33,6 +33,14 @@ POST /api/group/create (Token)
 PUT /api/group/addmember (Token)
   - body email
   - body name_group
+ * ลบสมาชิกใน กลุ่ม
+DELETE /api/group/removemember (Token)
+  - body: groupId
+  - body: userId
+  
+ * การจัดตาราง
+ PATCH /api/schedule/update/schedule
+  - body: duties
   
 * สร้างตารางอัตโนมัติ ให้กับสมาชิกภายในกลุ่ม
 PATCH /api/group/create/auto/:groupId
