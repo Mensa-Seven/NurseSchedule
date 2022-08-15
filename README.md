@@ -28,19 +28,28 @@ GET /api/schedule/me/all/ (Token)
 GET /api/group/me/member (Token)
 * สร้างกลุ่ม
 POST /api/group/create (Token)
-  - body: name_group
+  - body name_group
 * เพิ่ทมสมาชิกเข้ากลุ่ม
 PUT /api/group/addmember (Token)
   - body email
   - body name_group
  * ลบสมาชิกใน กลุ่ม
 DELETE /api/group/removemember (Token)
-  - body: groupId
-  - body: userId
+  - body groupId
+  - body userId
   
  * การจัดตาราง
  PATCH /api/schedule/update/schedule
-  - body: duties
+  - body _id
+  - _user
+  - year
+  - month
+  - day
+  - group
+  - morning
+  - noon
+  - night
+  - count
   
 * สร้างตารางอัตโนมัติ ให้กับสมาชิกภายในกลุ่ม
 PATCH /api/group/create/auto/:groupId
