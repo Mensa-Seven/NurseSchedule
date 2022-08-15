@@ -6,7 +6,7 @@ const authMiddleware = require('../middlewares/auth.js')
 const Duty = require('../model/Duty.js')
 const Group = require('../model/Group.js')
 const ScheduleGroup = require('../model/ScheduleGroup.js')
-const { findById, find, populate } = require('../model/User.js')
+const { findById, find, populate, findOne } = require('../model/User.js')
 const router = express.Router()
 const date = new Date()
 const runPy = require("../utils/runPy.js")
@@ -107,6 +107,9 @@ router.patch("/create/auto/:groupId", async (req, res) => {
     res.send("Success")
 
 })
+
+
+
 router.get('/list/me/all', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
@@ -250,6 +253,39 @@ router.get('/list/member/location', authMiddleware, async(req, res) => {
 })
 
 /// ของหัวหน้าพยาบาล เพิ่มสมาชิกในโรงพยาบาลลงกลุ่มตัวเอง
+router.delete('/removemember', authMiddleware, async (req, res) => {
+    const token = req.query.token || req.headers['x-access-token']
+    const pk = verifyToken(token)
+    const uid = pk.user_id.sub
+
+    try{
+        const userId = req.body.userId
+        const groupId = req.body.groupId
+       
+        const group = await Group.findOne({
+            _id: groupId,
+            _member: userId
+        })
+        await Group.findOneAndUpdate({
+            _id: groupId,
+            _member: userId
+        },
+        {
+            $pull:{
+                _member:userId
+            }
+        })
+        await ScheduleGroup.deleteOne({
+            _group: groupId,
+            _user: userId
+        })
+        res.send({message: "Success"})
+    
+
+    }catch(error){
+        res.send(error)
+    }
+})
 
 router.put('/addmember', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']

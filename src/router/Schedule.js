@@ -36,6 +36,47 @@ router.post('/create', async (req, res) => {
    
 })
 
+router.patch('/update/schedule', async(req, res) => {
+    
+    try{
+
+        const data = req.body.duties
+        const duties = []
+        data.forEach(async element => {
+            duties.push(element)
+        })
+
+        await Promise.all(duties.map((duty) => Duty.updateOne({
+            $and: [
+                {
+                    _id:duty._id
+                },
+                {
+                    _user: duty._user
+                },
+                {
+                    year: duty.year
+                },
+                {
+                    month: duty.month
+                },
+                {
+                    day: duty.day
+                },
+                {
+                    group: duty.group
+                }
+            ]
+        }, { $set: duty })))
+
+        res.send({message : "Success"})
+
+        
+    }catch(error){
+        res.send({error})
+    }
+})
+
 //ดึงข้อมูลเวรตัวเอง ในเดือนปัจจุบัน
 router.get('/me/present', authMiddleware, async(req, res) => {
     const token = req.query.token || req.headers['x-access-token']
@@ -44,6 +85,7 @@ router.get('/me/present', authMiddleware, async(req, res) => {
     })
     try{
         const pk = verifyToken(token)
+        console.log(pk);
         const duty = await Duty.find(
             {
             _user:pk.user_id.sub,
@@ -63,6 +105,7 @@ router.get('/me/present', authMiddleware, async(req, res) => {
         res.send(error)
     }
 })
+
 router.get('/me/all/:name_group', authMiddleware, async(req, res) => {
     const {name_group} = req.body.name_group || req.params
     const token = req.query.token || req.headers['x-access-token']
@@ -84,8 +127,7 @@ router.get('/me/all/:name_group', authMiddleware, async(req, res) => {
             res.send({schedule:data})
         })
 
-        
-       
+
 
     }catch(error){
         res.send(error)

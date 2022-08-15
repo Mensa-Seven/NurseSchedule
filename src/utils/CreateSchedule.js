@@ -13,7 +13,7 @@ const CreateSchedule = async(req, res, year) => {
        const check =  await Duty.findOne({
             _user:uid,
             year:year,
-            month:6
+            month:8
         })
         /// case ที่ไม่มี จะทำการสร้าง ตารางประจำปีขึ้นมา
         if(check === null){
@@ -23,7 +23,7 @@ const CreateSchedule = async(req, res, year) => {
                 const duty = await Duty.create({
                     _user:uid,
                     year:year,
-                    month:6,
+                    month:8,
                     day:m+1,
                     group:"",
                     morning:0,
