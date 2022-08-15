@@ -41,15 +41,15 @@ DELETE /api/group/removemember (Token)
  * การจัดตาราง
  PATCH /api/schedule/update/schedule
   - body _id
-  - _user
-  - year
-  - month
-  - day
-  - group
-  - morning
-  - noon
-  - night
-  - count
+  - body _user
+  - body year
+  - body month
+  - body day
+  - body group
+  - body morning
+  - body noon
+  - body night
+  - body count
   
 * สร้างตารางอัตโนมัติ ให้กับสมาชิกภายในกลุ่ม
 PATCH /api/group/create/auto/:groupId
