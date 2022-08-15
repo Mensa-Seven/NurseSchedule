@@ -22,9 +22,9 @@
             "day":"1",
             "group":"bbb-โรงพยาบาลบ้านดุง",
             "morning":1,
-            "noon":0,
+            "noon":1,
             "night":1,
-            "count":2,
+            "count":3,
             "__v":0
          },
          {
@@ -35,9 +35,9 @@
             "day":"2",
             "group":"bbb-โรงพยาบาลบ้านดุง",
             "morning":1,
-            "noon":0,
+            "noon":1,
             "night":1,
-            "count":2,
+            "count":3,
             "__v":0
          },
          {
@@ -48,9 +48,9 @@
             "day":"3",
             "group":"bbb-โรงพยาบาลบ้านดุง",
             "morning":1,
-            "noon":0,
-            "night":0,
-            "count":0,
+            "noon":1,
+            "night":1,
+            "count":3,
             "__v":0
          },
          {

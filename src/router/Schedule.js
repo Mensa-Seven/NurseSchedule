@@ -4,7 +4,7 @@ const CreateSchedule = require("../utils/CreateSchedule.js")
 const {_, verifyToken} = require('../utils/token.js')
 const authMiddleware = require('../middlewares/auth.js')
 const Duty = require('../model/Duty.js')
-const { $where } = require('../model/User.js')
+const { $where, updateOne } = require('../model/User.js')
 const Group = require('../model/Group.js')
 const ScheduleGroup = require('../model/ScheduleGroup.js')
 
@@ -43,34 +43,30 @@ router.patch('/update/schedule', async(req, res) => {
         const data = req.body.duties
         const duties = []
         data.forEach(async element => {
-            duties.push(element)
+            duties.push(...element._duty)
+            
         })
 
         await Promise.all(duties.map((duty) => Duty.updateOne({
             $and: [
                 {
-                    _id:duty._id
+                    _user: duty._user
                 },
                 {
-                    _user: duty._user
+                    day: duty.day
                 },
                 {
                     year: duty.year
                 },
                 {
                     month: duty.month
-                },
-                {
-                    day: duty.day
-                },
-                {
-                    group: duty.group
                 }
             ]
         }, { $set: duty })))
+    
 
-        res.send({message : "Success"})
-
+      
+        res.send({messag: "message"})
         
     }catch(error){
         res.send({error})
