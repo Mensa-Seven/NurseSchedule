@@ -7,7 +7,6 @@ const Duty = require('../model/Duty.js')
 const { $where, updateOne } = require('../model/User.js')
 const Group = require('../model/Group.js')
 const ScheduleGroup = require('../model/ScheduleGroup.js')
-const { json } = require('express')
 
 const router = express.Router()
 const date = new Date()
@@ -41,53 +40,32 @@ router.patch('/update/schedule', async(req, res) => {
     
     try{
 
-        data = {
-            "_id": req.body._id,
-            "_user": req.body._user,
-            "year": req.body.year,
-            "month": req.body.month,
-            "day": req.body.day,
-            "group": req.body.group,
-            "morning": req.body.morning,
-            "noon": req.body.noon,
-            "night": req.body.night,
-            "count": req.body.count
-        }
-
-        // const data = req.body.duties
-        // const duties = []
-        // data.forEach(async element => {
-        //     duties.push(...element._duty)
-        // })
-        const duty = await Duty.findOneAndUpdate({_id:data._id},{
-            $set: data
+        const data = req.body.duties
+        const duties = []
+        data.forEach(async element => {
+            duties.push(...element._duty)
+            
         })
 
- 
-
-        // await Duty.updateOne({
-        //     $and: [
-        //         {
-        //             _id: data._id
-        //         },
-        //         {
-        //             _user: data._user
-        //         },
-        //         {
-        //             day: duty.day
-        //         },
-        //         {
-        //             year: duty.year
-        //         },
-        //         {
-        //             month: duty.month
-        //         }
-        //     ]
-        // }, { $set: data })
-      
+        await Promise.all(duties.map((duty) => Duty.updateOne({
+            $and: [
+                {
+                    _user: duty._user
+                },
+                {
+                    day: duty.day
+                },
+                {
+                    year: duty.year
+                },
+                {
+                    month: duty.month
+                }
+            ]
+        }, { $set: duty })))
     
 
-        console.log(duty);
+      
         res.send({messag: "message"})
         
     }catch(error){
