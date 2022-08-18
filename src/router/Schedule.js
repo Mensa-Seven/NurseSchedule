@@ -10,7 +10,7 @@ const ScheduleGroup = require('../model/ScheduleGroup.js')
 
 const router = express.Router()
 const date = new Date()
- 
+
 var dutys  = []
 
 
@@ -33,18 +33,18 @@ router.post('/create', async (req, res) => {
         message:error
     })
    }
-   
+
 })
 
 router.patch('/update/schedule', async(req, res) => {
-    
+
     try{
 
         const data = req.body.duties
         const duties = []
         data.forEach(async element => {
             duties.push(...element._duty)
-            
+
         })
 
         await Promise.all(duties.map((duty) => Duty.updateOne({
@@ -63,11 +63,11 @@ router.patch('/update/schedule', async(req, res) => {
                 }
             ]
         }, { $set: duty })))
-    
 
-      
+
+
         res.send({messag: "message"})
-        
+
     }catch(error){
         res.send({error})
     }
@@ -93,9 +93,9 @@ router.get('/me/present', authMiddleware, async(req, res) => {
             select:['frist_name', 'last_name', 'actor']
         })
         .exec(function(error, data){
-            res.send({Duty:data}) 
+            res.send({Duty:data})
         })
-       
+
 
     }catch(error){
         res.send(error)
@@ -113,7 +113,7 @@ router.get('/me/all/:name_group', authMiddleware, async(req, res) => {
         const pk = verifyToken(token)
         const uid = pk.user_id.sub
         const user = await User.findById(uid)
-        
+
         const group = await Group.findOne({_member:user._id, location:user.location, name_group:name_group})
         await ScheduleGroup.find({_group:group._id})
         .populate('_group')
@@ -170,7 +170,7 @@ router.get('/me/present/shift', authMiddleware, async(req, res) => {
     try{
         const pk = verifyToken(token)
         const uid = pk.user_id.sub
-    
+
         await Duty.find({
             _user:uid,
             year:date.getFullYear(),
@@ -205,7 +205,7 @@ router.get('/me/month', authMiddleware, async(req, res) => {
     if(!token) return res.send({
         message:"invalidit Token"
     })
-    
+
     try{
 
         const pk = verifyToken(token)
@@ -216,7 +216,7 @@ router.get('/me/month', authMiddleware, async(req, res) => {
         })
         .populate('_user')
         .exec(function(error, data){
-           
+
         })
 
 
