@@ -69,4 +69,11 @@ GET /api/group/schedule/me/all (Token)
 * สร้างกลุ่ม (หัวหน้าพยาบาล)
 * POST /api/group/create 
   Body name_group String
+ 
+* เชิญสมาชิกเข้ากลุ่ม (หัวหน้าพยาบาล)
+POST /api/invite/invite (Token)
+  - body email
+  - body name_group
   
+* ดึงคำเชิญที่ส่งมาถึงเรา
+GET /api/invite/invite (Token)
