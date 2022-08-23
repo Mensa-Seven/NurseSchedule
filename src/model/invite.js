@@ -17,6 +17,10 @@ const Invite = new mongoose.Schema({
     type:mongoose.Schema.Types.ObjectId,
     ref:"User"
    },
+   show:{
+      type:Boolean,
+      default:true
+   },
    apporve:{
     type:Boolean,
     default:false

@@ -38,8 +38,10 @@ router.get('/invite', authMiddleware, async(req, res) => {
     try{
 
 
-        const invite = await Invite.find({_member:uid})
+        const invite = await Invite.find({_member:uid, show:true})
+        .populate('_leader')
         .populate('_group')
+        .populate('_member')
         .exec(function(error, data){
             res.send({invite:data})
         })

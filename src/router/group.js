@@ -6,7 +6,7 @@ const authMiddleware = require('../middlewares/auth.js')
 const Duty = require('../model/Duty.js')
 const Group = require('../model/Group.js')
 const ScheduleGroup = require('../model/ScheduleGroup.js')
-const { findById, find, populate, findOne } = require('../model/User.js')
+const { findById, find, populate, findOne, count } = require('../model/User.js')
 const router = express.Router()
 const date = new Date()
 const runPy = require("../utils/runPy.js")
@@ -259,27 +259,33 @@ router.delete('/removemember', authMiddleware, async (req, res) => {
     const uid = pk.user_id.sub
 
     try{
-        const userId = req.body.userId
+        const email = req.body.email
         const groupId = req.body.groupId
        
+        const user = await User.findOne({email:email})
+
         const group = await Group.findOne({
             _id: groupId,
-            _member: userId
+            _member: user._id
         })
-        await Group.findOneAndUpdate({
+        if(group !== null){
+         await Group.findOneAndUpdate({
             _id: groupId,
-            _member: userId
+            _member: user._id
         },
         {
             $pull:{
-                _member:userId
+                _member:user._id
             }
         })
         await ScheduleGroup.deleteOne({
             _group: groupId,
-            _user: userId
+            _user: user._id
         })
         res.send({message: "Success"})
+
+        }
+       
     
 
     }catch(error){
