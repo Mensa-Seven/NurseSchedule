@@ -36,7 +36,7 @@ PUT /api/group/addmember (Token)
  * ลบสมาชิกใน กลุ่ม
 DELETE /api/group/removemember (Token)
   - body groupId
-  - body userId
+  - body email
   
  * การจัดตาราง
  PATCH /api/schedule/update/schedule
