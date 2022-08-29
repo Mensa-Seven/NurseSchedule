@@ -42,61 +42,61 @@ router.put('/apporve', authMiddleware, async (req, res) => {
         if(!user) return res.send({message:"ไม่พบ userId"})
 
         if(apporve === false){
-         
-        const invite = await Invite.findOneAndUpdate({_group:group._id, _member:user._id},
-            {
-                show:false,
-                apporve:false
-            })   
+            
+            const invite = await Invite.findOneAndUpdate({_group:group._id, _member:user._id},
+                {
+                    show:false,
+                    apporve:false
+                })   
+            res.send({message:"success"})
         }
-
+        
 
         const invite = await Invite.findOneAndUpdate({_group:group._id, _member:user._id},
             {
                 show:false,
                 apporve:true
             })
-        
-        await Group.findByIdAndUpdate({
-            _id:group._id
-        },
-        {
-            $push:{
-                _member:user._id
-            }
-        })
-        .then(async() => {
-            await ScheduleGroup.create({
-                _group: group._id,
-                _user: user._id,
+            
+            await Group.findByIdAndUpdate({
+                _id:group._id
+            },
+            {
+                $push:{
+                    _member:user._id
+                }
             })
+            .then(async() => {
+                await ScheduleGroup.create({
+                    _group: group._id,
+                    _user: user._id,
+                })
 
-            const duty = await Duty.find({
-                _user: user._id,
-                year: date.getFullYear(),
-                month: date.getMonth() +1
+                const duty = await Duty.find({
+                    _user: user._id,
+                    year: date.getFullYear(),
+                    month: date.getMonth() +1
+                })
+                
+                await duty.forEach(async element => {
+                    duties.push(element._id)
+                })
+            
+                await ScheduleGroup.updateOne({
+                    $and:[
+                        {
+                            _group:group._id
+                        },
+                        {
+                            _user:user._id
+                        }
+                    ]
+                }, {$push:{ _duty:duties}} )
+
+
             })
-             
-            await duty.forEach(async element => {
-                duties.push(element._id)
-            })
-        
-            await ScheduleGroup.updateOne({
-                $and:[
-                    {
-                        _group:group._id
-                    },
-                    {
-                        _user:user._id
-                    }
-                ]
-            }, {$push:{ _duty:duties}} )
-
-
-        })
         
         res.send({message:"success"})
-
 
 
 
