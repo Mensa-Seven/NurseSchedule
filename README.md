@@ -77,3 +77,9 @@ POST /api/invite/invite (Token)
   
 * ดึงคำเชิญที่ส่งมาถึงเรา
 GET /api/invite/invite (Token)
+
+* ยืนยันเเละยกเลิก การเชิญเข้ากลุ่ม
+PUT /api/invite/apporve
+  - body groupId
+  - body userId
+  - body approve 
