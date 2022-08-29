@@ -19,8 +19,85 @@ router.get('/TEST', (req, res) => {
 })
 
 router.put('/apporve', authMiddleware, async (req, res) => {
+    //หัวหน้าส่ง true
+    //เปลี่ยนสถาณะ
+    //เพิ่มสมาชิกเข้ากลุ่ม
+    //สร้างตารางเวรต่อกับกลุ่ม
+    const token = req.query.token || req.headers['x-access-token']
+    const pk = verifyToken(token)
+    const uid = pk.user_id.sub
+    const duties = []
+
 
     try{
+        const groupId = req.body.groupId
+        const userId = req.body.userId
+        const apporve = req.body.apporve
+        const group = await Group.findById(groupId)
+        const user = await User.findById(userId)
+
+        if(!groupId) return res.send({
+            message:"ไม่พบ groupId"
+        })
+        if(!user) return res.send({message:"ไม่พบ userId"})
+
+        if(apporve === false){
+         
+        const invite = await Invite.findOneAndUpdate({_group:group._id, _member:user._id},
+            {
+                show:false,
+                apporve:false
+            })   
+        }
+
+
+        const invite = await Invite.findOneAndUpdate({_group:group._id, _member:user._id},
+            {
+                show:false,
+                apporve:true
+            })
+        
+        await Group.findByIdAndUpdate({
+            _id:group._id
+        },
+        {
+            $push:{
+                _member:user._id
+            }
+        })
+        .then(async() => {
+            await ScheduleGroup.create({
+                _group: group._id,
+                _user: user._id,
+            })
+
+            const duty = await Duty.find({
+                _user: user._id,
+                year: date.getFullYear(),
+                month: date.getMonth() +1
+            })
+             
+            await duty.forEach(async element => {
+                duties.push(element._id)
+            })
+        
+            await ScheduleGroup.updateOne({
+                $and:[
+                    {
+                        _group:group._id
+                    },
+                    {
+                        _user:user._id
+                    }
+                ]
+            }, {$push:{ _duty:duties}} )
+
+
+        })
+        
+        res.send({message:"success"})
+
+
 
 
     }catch(error){
@@ -28,6 +105,8 @@ router.put('/apporve', authMiddleware, async (req, res) => {
     }
 
 })
+
+
 
 router.get('/invite', authMiddleware, async(req, res) => {
     const token = req.query.token || req.headers['x-access-token']
