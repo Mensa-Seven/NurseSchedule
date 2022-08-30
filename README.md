@@ -83,4 +83,11 @@ PUT /api/invite/apporve
   - body id
   - body groupId
   - body userId
-  - body approve 
+  - body apporve 
+  
+ * ส่งคำขอเเลกเวร
+ POST /api/changduty/invite (Token)
+  - body data
+ * ดึงคำร้องส่งขอเเลกเวร
+ GET /api/changduty/invite (Token)
+ 
