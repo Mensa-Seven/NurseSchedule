@@ -27,10 +27,39 @@ router.patch('/inproive',  authMiddleware, async (req, res) => {
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
     const apporve = req.body.apporve
-    const chagnId = req.body
+    const chagnId = req.body.chagnId
+    
     
     try{
         
+        if(apporve === false){
+            const chang = await ChangDuty.findOneAndUpdate({_id:chagnId, member_approve:false, show:true}
+                ,{
+                    member_approve: false,
+                    show: false
+                })
+            
+            return res.send({message:"success"})
+
+        }else{
+
+            await ChangDuty.updateOne({
+                _id: chagnId,
+                member_approve: false,
+                show:true
+            },{
+                show:false
+            })
+
+            return res.send({message:"success"})
+
+
+        }
+
+
+
+
+
         
         
     }catch(error){
@@ -62,7 +91,7 @@ router.post('/invite', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
-
+    const data = req.body.data
     try{
 
 

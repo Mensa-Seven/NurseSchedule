@@ -18,6 +18,7 @@ router.get('/TEST', (req, res) => {
     res.send({message:"PASS"})
 })
 
+
 router.put('/apporve', authMiddleware, async (req, res) => {
     //หัวหน้าส่ง true
     //เปลี่ยนสถาณะ
@@ -48,7 +49,7 @@ router.put('/apporve', authMiddleware, async (req, res) => {
                     show:false,
                     apporve:false
                 })   
-            res.send({message:"success"})
+            return res.send({message:"success"})
         }
         
 
