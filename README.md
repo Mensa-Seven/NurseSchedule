@@ -80,6 +80,7 @@ GET /api/invite/invite (Token)
 
 * ยืนยันเเละยกเลิก การเชิญเข้ากลุ่ม
 PUT /api/invite/apporve
+  - body id
   - body groupId
   - body userId
   - body approve 
