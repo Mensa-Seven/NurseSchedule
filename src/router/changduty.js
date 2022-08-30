@@ -69,6 +69,8 @@ router.patch('/inproive',  authMiddleware, async (req, res) => {
 
 
 
+router.patch('/')
+
 router.get('/invite', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
@@ -87,13 +89,13 @@ router.get('/invite', authMiddleware, async (req, res) => {
         res.send({message:error})
     }
 })
+
 router.post('/invite', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
     const data = req.body.data
     try{
-
 
       const member1 = data[0]
       const member2 = data[1]

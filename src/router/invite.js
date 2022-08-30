@@ -44,61 +44,65 @@ router.put('/apporve', authMiddleware, async (req, res) => {
 
         if(apporve === false){
             
-            const invite = await Invite.findOneAndUpdate({_group:group._id, _member:user._id},
+            const invite = await Invite.updateOne({_group:group._id, _member:user._id},
                 {
                     show:false,
                     apporve:false
                 })   
             return res.send({message:"success"})
+        }else{
+
+            const invite = await Invite.findOneAndUpdate({_group:group._id, _member:user._id},
+                {
+                    show:false,
+                    apporve:true
+                })
+                
+                await Group.findByIdAndUpdate({
+                    _id:group._id
+                },
+                {
+                    $push:{
+                        _member:user._id
+                    }
+                })
+                .then(async() => {
+                    await ScheduleGroup.create({
+                        _group: group._id,
+                        _user: user._id,
+                    })
+    
+                    const duty = await Duty.find({
+                        _user: user._id,
+                        year: date.getFullYear(),
+                        month: date.getMonth() +1
+                    })
+                    
+                    await duty.forEach(async element => {
+                        duties.push(element._id)
+                    })
+                
+                    await ScheduleGroup.updateOne({
+                        $and:[
+                            {
+                                _group:group._id
+                            },
+                            {
+                                _user:user._id
+                            }
+                        ]
+                    }, {$push:{ _duty:duties}} )
+    
+    
+                })
+            
+            res.send({message:"success"})
+    
+
         }
         
 
-        const invite = await Invite.findOneAndUpdate({_group:group._id, _member:user._id},
-            {
-                show:false,
-                apporve:true
-            })
-            
-            await Group.findByIdAndUpdate({
-                _id:group._id
-            },
-            {
-                $push:{
-                    _member:user._id
-                }
-            })
-            .then(async() => {
-                await ScheduleGroup.create({
-                    _group: group._id,
-                    _user: user._id,
-                })
-
-                const duty = await Duty.find({
-                    _user: user._id,
-                    year: date.getFullYear(),
-                    month: date.getMonth() +1
-                })
-                
-                await duty.forEach(async element => {
-                    duties.push(element._id)
-                })
-            
-                await ScheduleGroup.updateOne({
-                    $and:[
-                        {
-                            _group:group._id
-                        },
-                        {
-                            _user:user._id
-                        }
-                    ]
-                }, {$push:{ _duty:duties}} )
-
-
-            })
-        
-        res.send({message:"success"})
-
+     
 
 
     }catch(error){
@@ -116,7 +120,6 @@ router.get('/invite', authMiddleware, async(req, res) => {
     
 
     try{
-
 
         const invite = await Invite.find({_member:uid, show:true})
         .populate('_leader')
