@@ -31,6 +31,8 @@ router.put('/apporve', authMiddleware, async (req, res) => {
 
 
     try{
+
+        const id = req.body.id
         const groupId = req.body.groupId
         const userId = req.body.userId
         const apporve = req.body.apporve
@@ -43,16 +45,19 @@ router.put('/apporve', authMiddleware, async (req, res) => {
         if(!user) return res.send({message:"ไม่พบ userId"})
 
         if(apporve === false){
+            console.log(group._id, user._id, apporve);
+
             
-            const invite = await Invite.updateOne({_group:group._id, _member:user._id},
+            await Invite.findOneAndUpdate({_id:id,_group:group._id, _member:user._id},
                 {
-                    show:false,
-                    apporve:false
+                    show:false
                 })   
             return res.send({message:"success"})
-        }else{
 
-            const invite = await Invite.findOneAndUpdate({_group:group._id, _member:user._id},
+        }
+        if(apporve === true){
+            console.log("TEST");
+            const invite = await Invite.findOneAndUpdate({_id: id, _group:group._id, _member:user._id},
                 {
                     show:false,
                     apporve:true
@@ -96,11 +101,10 @@ router.put('/apporve', authMiddleware, async (req, res) => {
     
                 })
             
-            res.send({message:"success"})
+            return res.send({message:"success"})
     
-
         }
-        
+            
 
      
 
