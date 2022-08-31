@@ -81,7 +81,7 @@ router.patch('/inproive',  authMiddleware, async (req, res) => {
     try{
         
         if(apporve === false){
-            const chang = await ChangDuty.findOneAndUpdate({_id:chagnId, member_approve:true, show:true}
+            const chang = await ChangDuty.findOneAndUpdate({_id:chagnId}
                 ,{
                     member_approve: false,
                     show: false
@@ -117,7 +117,6 @@ router.get('/invite', authMiddleware, async (req, res) => {
     const uid = pk.user_id.sub
    
     try{
-        
         await ChangDuty.find({member1:uid, show:true})
         .populate('member1')
         .populate('member2')
