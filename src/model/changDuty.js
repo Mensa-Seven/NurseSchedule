@@ -34,7 +34,7 @@ const ChangDuty = new mongoose.Schema({
     }],
     member_approve:{
         type:Boolean,
-        default:false
+        default:true
     },
     show:{
         type:Boolean,
