@@ -12,6 +12,7 @@ const router = express.Router()
 const date = new Date()
 const runPy = require("../utils/runPy.js")
 const fs = require('fs')
+const { group } = require('console')
 
 
 router.get('/TEST', (req, res) => {
@@ -32,9 +33,35 @@ router.get('/leader/invited', authMiddleware, async (req, res) => {
 
 
         const Duty = await ChangDuty.findOne({_id:chagnId, member_approve: false, show: true, approve: false})
-        console.log(Duty);
+        const group1 = await Group.findOne({_member:Duty.member1})
+        const group2 = await Group.findOne({_member:Duty.member2})
+       
+        if (group1._leader[0] === group1._leader[0]){
+            await Group.findOne({
+                $and:[
+                    {
+                        _leader:uid,
+                        _member:Duty.member1 || Duty.member2
+                    
+                    }
+                ]
+            })
+            .then( async function(data, error){
+                 await ChangDuty.findOne({_id:chagnId, member_approve: false, show: true, approve: false})
+                .populate('member1')
+                .populate('member2')
+                .populate('_duty1')
+                .populate('member_shift1')
+                .populate('_duty2')
+                .populate('member_shift2')
+                .exec(async function(error, data){
+                    res.send({data:data})
+                })
+            })
 
-        
+        }
+
+
 
     }catch(error){
         res.send({message:error})
@@ -81,21 +108,6 @@ router.patch('/inproive',  authMiddleware, async (req, res) => {
         
     }catch(error){
         res.send({message:error})
-    }
-})
-
-
-
-router.get('/invited', authMiddleware, async (req, res) => {
-    const token = req.query.token || req.headers['x-access-token']
-    const pk = verifyToken(token)
-    const uid = pk.user_id.sub
-    
-    try{
-
-
-    }catch(error){
-
     }
 })
 
