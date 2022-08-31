@@ -91,3 +91,12 @@ PUT /api/invite/apporve
  * ดึงคำร้องส่งขอเเลกเวร
  GET /api/changduty/invite (Token)
  
+ * ยืนยันเเละไม่ยืนยัน คำขอเเลกเวร
+ PATCH /api/changduty/inproive (Token)
+  - body apporve: bool
+  - body chagnId: String
+ 
+ * ดึงคำร้องเเลกเวร (หัวหน้า)
+  - body chagnId
+  
+
