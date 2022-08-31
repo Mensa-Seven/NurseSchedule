@@ -77,25 +77,20 @@ router.patch('/inproive',  authMiddleware, async (req, res) => {
     const uid = pk.user_id.sub
     const apporve = req.body.apporve
     const chagnId = req.body.chagnId
-    console.log(apporve);
     try{
         
         if(apporve === false){
             const chang = await ChangDuty.findOneAndUpdate({_id:chagnId}
                 ,{
-                    member_approve: false,
-                    show: false
+                    member_approve: false
                 })
-                console.log(chang);
             
             return res.send({message:"success"})
 
         }else{
-
+        
             await ChangDuty.updateOne({
-                _id: chagnId,
-                member_approve: false,
-                show:true
+                _id: chagnId
             },{
                 show:false
             })
@@ -125,7 +120,12 @@ router.get('/invite', authMiddleware, async (req, res) => {
         .populate('_duty2')
         .populate('member_shift2')
         .exec(async function(error, data){
-            res.send({data:data})
+            if(data.length !== 0){
+                res.send({data:data})
+
+            }else{
+                res.send({messaeg:"don't have req"})
+            }
         })
     }catch(error){
         res.send({message:error})
