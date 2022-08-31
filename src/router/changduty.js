@@ -22,6 +22,28 @@ router.get('/TEST', (req, res) => {
 })
 
 
+router.get('/leader/invited', authMiddleware, async (req, res) => {
+    try{
+        const token = req.query.token || req.headers['x-access-token']
+        const pk = verifyToken(token)
+        const uid = pk.user_id.sub
+
+        const chagnId = req.body.chagnId
+
+
+        const Duty = await ChangDuty.findOne({_id:chagnId, member_approve: false, show: true, approve: false})
+        console.log(Duty);
+
+        
+
+    }catch(error){
+        res.send({message:error})
+    }
+})
+
+
+
+
 router.patch('/inproive',  authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
@@ -55,11 +77,6 @@ router.patch('/inproive',  authMiddleware, async (req, res) => {
 
 
         }
-
-
-
-
-
         
         
     }catch(error){
@@ -88,10 +105,13 @@ router.get('/invite', authMiddleware, async (req, res) => {
     const uid = pk.user_id.sub
    
     try{
+        
         await ChangDuty.find({member1:uid, show:true})
         .populate('member1')
         .populate('member2')
+        .populate('_duty1')
         .populate('member_shift1')
+        .populate('_duty2')
         .populate('member_shift2')
         .exec(async function(error, data){
             res.send({data:data})
@@ -110,6 +130,8 @@ router.post('/invite', authMiddleware, async (req, res) => {
     const data = req.body.data
     
     try{
+        console.log(data[0]);
+        console.log(data[1]);
 
       const member1 = data[0]
       const member2 = data[1]
@@ -119,7 +141,9 @@ router.post('/invite', authMiddleware, async (req, res) => {
         _group2: member2.group,
         member1: member1._user,
         member2: member2._user,
+        _duty1: member1._id,
         member_shift1: member1.shift,
+        _duty2: member2._id,
         member_shift2: member2.shift
       }).then(async function(data){
         res.send({message:"success"})

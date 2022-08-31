@@ -18,9 +18,17 @@ const ChangDuty = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
     },
+    _duty1:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Duty"
+    },
     member_shift1:[{
         type: Object
     }],
+    _duty2:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Duty"
+    },
     member_shift2:[{
         type: Object
     }],
