@@ -96,7 +96,8 @@ PUT /api/invite/apporve
   - body apporve: bool
   - body chagnId: String
  
- * ดึงคำร้องเเลกเวร (หัวหน้า)
+* ดึงคำร้องเเลกเวร (หัวหน้า)
+GET /api/changduty/leader/invited (Token)
   - body chagnId
   
 
