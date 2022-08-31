@@ -112,7 +112,21 @@ router.get('/invite', authMiddleware, async (req, res) => {
     const uid = pk.user_id.sub
    
     try{
-        await ChangDuty.find({member1:uid, show:true})
+        await ChangDuty.find({
+            $or:[
+                {
+                    member1: uid
+                },
+                {
+                    member2: uid   
+                }
+            ],
+            $and:[
+                {
+                    show: true
+                }
+            ]
+        })
         .populate('member1')
         .populate('member2')
         .populate('_duty1')
