@@ -69,7 +69,18 @@ router.patch('/inproive',  authMiddleware, async (req, res) => {
 
 
 
-router.patch('/')
+router.get('/invited', authMiddleware, async (req, res) => {
+    const token = req.query.token || req.headers['x-access-token']
+    const pk = verifyToken(token)
+    const uid = pk.user_id.sub
+    
+    try{
+
+
+    }catch(error){
+
+    }
+})
 
 router.get('/invite', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
@@ -95,6 +106,7 @@ router.post('/invite', authMiddleware, async (req, res) => {
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
     const data = req.body.data
+    
     try{
 
       const member1 = data[0]
@@ -103,8 +115,8 @@ router.post('/invite', authMiddleware, async (req, res) => {
       await ChangDuty.create({
         _group1: member1.group,
         _group2: member2.group,
-        member1: member1._id,
-        member2: member2._id,
+        member1: member1._user,
+        member2: member2._user,
         member_shift1: member1.shift,
         member_shift2: member2.shift
       }).then(async function(data){

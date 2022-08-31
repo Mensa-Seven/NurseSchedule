@@ -53,8 +53,6 @@ router.post('/login', async(req, res) => {
 
 		const token = createToken({ sub: user._id, v: user.tokenVersion })
 
-
-
 		res.send({
 			user:user,
 			token:token
