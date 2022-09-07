@@ -13,96 +13,201 @@ const date = new Date()
 const runPy = require("../utils/runPy.js")
 const fs = require('fs')
 const { group } = require('console')
+const { countShift } = require("../utils/shift")
 
 
 router.get('/TEST', (req, res) => {
     res.send({
-        message:"Hello World"
+        message: "Hello World"
     })
     console.log(ChangDuty);
 })
 
 
+
+
+
 router.get('/leader/invited', authMiddleware, async (req, res) => {
-    try{
+    try {
+
         const token = req.query.token || req.headers['x-access-token']
         const pk = verifyToken(token)
         const uid = pk.user_id.sub
 
         const chagnId = req.body.chagnId
+        //req true or false
+        const approve = req.body.approve
 
+        //get data invited from nures
+        const Duty = await ChangDuty.findOne({ _id: chagnId, member_approve: true, show: false, approve: false })
+        const group1 = await Group.findOne({ _member: Duty.member1 })
+        const group2 = await Group.findOne({ _member: Duty.member2 })
 
-        const Duty = await ChangDuty.findOne({_id:chagnId, member_approve: false, show: true, approve: false})
-        const group1 = await Group.findOne({_member:Duty.member1})
-        const group2 = await Group.findOne({_member:Duty.member2})
-       
-        if (group1._leader[0] === group1._leader[0]){
+        //case leader เป็นคนเดียวคนเดียวกัน        
+        if (group1._leader[0] === group2._leader[0]) {
             await Group.findOne({
-                $and:[
+                $and: [
                     {
-                        _leader:uid,
-                        _member:Duty.member1 || Duty.member2
-                    
+                        _leader: uid,
+                        _member: Duty.member1 || Duty.member2
+
                     }
                 ]
             })
-            .then( async function(data, error){
-                 await ChangDuty.findOne({_id:chagnId, member_approve: false, show: true, approve: false})
-                .populate('member1')
-                .populate('member2')
-                .populate('_duty1')
-                .populate('member_shift1')
-                .populate('_duty2')
-                .populate('member_shift2')
-                .exec(async function(error, data){
-                    res.send({data:data})
+                .then(async function (data, error) {
+                    await ChangDuty.findOne({ _id: chagnId, member_approve: false, show: true, approve: false })
+                        .populate('member1')
+                        .populate('member2')
+                        .populate('_duty1')
+                        .populate('member_shift1')
+                        .populate('_duty2')
+                        .populate('member_shift2')
+                        .exec(async function (error, data) {
+                            res.send({ data: data })
+                        })
                 })
-            })
 
         }
 
 
 
-    }catch(error){
-        res.send({message:error})
+    } catch (error) {
+        res.send({ message: error })
     }
 })
 
 
 
 
-router.patch('/inproive',  authMiddleware, async (req, res) => {
+/// ระบบอนุมัติคำร้องเเลกเวรจากพยาบาล
+router.patch('/leader/inprove', authMiddleware, async (req, res) => {
+    try {
+        const token = req.query.token || req.headers['x-access-token']
+        const pk = verifyToken(token)
+        const uid = pk.user_id.sub
+
+        // console.log(uid)
+
+        const approve = req.body.approve
+        const changId = req.body.changId
+        console.log(req.body)
+
+        const Dutys = await ChangDuty.findOne({
+            $and: [
+                {
+                    _id: changId
+                },
+
+                {
+                    show: false
+                },
+                {
+                    member_approve: true
+                },
+
+                {
+                    approve: false
+                }
+            ]
+        })
+
+        if (!Dutys) return res.send("duty is null")
+
+
+
+        //เช็คเงื่อนไขว่า สมาชิกเเละหัวหน้าเป็นสมาชิกกลุ่มเดียวกันหรือไม่  
+
+        const group = await Group.findOne({
+            $and: [{
+                _leader: {
+                    $elemMatch: {
+                        $eq: uid
+                    }
+                }
+            },
+            {
+                _member: {
+                    $in: [Dutys.member1, Dutys.member2]
+                }
+            }]
+        }
+        )
+
+        if (!group) {
+            return res.send("group not found")
+        }
+
+        if (!approve) {
+            Dutys.show = false
+            Dutys.approve = false
+            await Dutys.save()
+            return res.send("no approve")
+        }
+
+        const duty_1 = Dutys._duty1
+        const duty_2 = Dutys._duty2
+
+        const [memberDuty1, memberDuty2] = await Promise.all([Duty.findById(duty_1), Duty.findById(duty_2)])
+
+
+        const shift_1 = Dutys.member_shift1[0]
+        const shift_2 = Dutys.member_shift2[0]
+
+        Object.keys(shift_2).forEach(key => {
+            memberDuty1[key] = 0
+            memberDuty2[key] = 1
+        })
+
+        Object.keys(shift_1).forEach(key => {
+            memberDuty1[key] = 1
+            memberDuty2[key] = 0
+        })
+
+        memberDuty1.count = countShift(memberDuty1)
+        memberDuty2.count = countShift(memberDuty2)
+
+        await Promise.all([memberDuty1.save(), memberDuty2.save()])
+
+        return res.send(group)
+
+    } catch (error) {
+        res.send({ message: error })
+    }
+})
+
+
+router.patch('/inproive', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
     const apporve = req.body.apporve
     const chagnId = req.body.chagnId
-    try{
-        
-        if(apporve === false){
-            const chang = await ChangDuty.findOneAndUpdate({_id:chagnId}
-                ,{
+    try {
+
+        if (apporve === false) {
+            const chang = await ChangDuty.findOneAndUpdate({ _id: chagnId }
+                , {
                     member_approve: false
                 })
-            
-            return res.send({message:"success"})
 
-        }else{
-        
+            return res.send({ message: "success" })
+
+        } else {
+
             await ChangDuty.updateOne({
                 _id: chagnId
-            },{
-                show:false
+            }, {
+                show: false
             })
 
-            return res.send({message:"success"})
+            return res.send({ message: "success" })
 
 
         }
-        
-        
-    }catch(error){
-        res.send({message:error})
+
+
+    } catch (error) {
+        res.send({ message: error })
     }
 })
 
@@ -110,39 +215,39 @@ router.get('/invite', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
-   
-    try{
+
+    try {
         await ChangDuty.find({
-            $or:[
+            $or: [
                 {
                     member1: uid
                 },
                 {
-                    member2: uid   
+                    member2: uid
                 }
             ],
-            $and:[
+            $and: [
                 {
                     show: true
                 }
             ]
         })
-        .populate('member1')
-        .populate('member2')
-        .populate('_duty1')
-        .populate('member_shift1')
-        .populate('_duty2')
-        .populate('member_shift2')
-        .exec(async function(error, data){
-            if(data.length !== 0){
-                res.send({data:data})
+            .populate('member1')
+            .populate('member2')
+            .populate('_duty1')
+            .populate('member_shift1')
+            .populate('_duty2')
+            .populate('member_shift2')
+            .exec(async function (error, data) {
+                if (data.length !== 0) {
+                    res.send({ data: data })
 
-            }else{
-                res.send({messaeg:"don't have req"})
-            }
-        })
-    }catch(error){
-        res.send({message:error})
+                } else {
+                    res.send({ messaeg: "don't have req" })
+                }
+            })
+    } catch (error) {
+        res.send({ message: error })
     }
 })
 
@@ -153,29 +258,28 @@ router.post('/invite', authMiddleware, async (req, res) => {
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
     const data = req.body.data
-    
-    try{
-        console.log(data[0]);
-        console.log(data[1]);
+    dutes1 = []
 
-      const member1 = data[0]
-      const member2 = data[1]
+    try {
 
-      await ChangDuty.create({
-        _group1: member1.group,
-        _group2: member2.group,
-        member1: member1._user,
-        member2: member2._user,
-        _duty1: member1._id,
-        member_shift1: member1.shift,
-        _duty2: member2._id,
-        member_shift2: member2.shift
-      }).then(async function(data){
-        res.send({message:"success"})
-      })
+        const member1 = data[0]
+        const member2 = data[1]
 
-    }catch(error){
-        res.send({message: error})
+        await ChangDuty.create({
+            _group1: member1.group,
+            _group2: member2.group,
+            member1: member1._user,
+            member2: member2._user,
+            _duty1: member1._id,
+            member_shift1: member1.shift,
+            _duty2: member2._id,
+            member_shift2: member2.shift
+        }).then(async function (data) {
+            res.send({ message: "success" })
+        })
+
+    } catch (error) {
+        res.send({ message: error })
     }
 })
 

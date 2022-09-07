@@ -6,6 +6,7 @@ const Duty = require('../model/Duty.js')
 // เป็นฟังก์ชัน สร้าง ตารางของ User ทั้งหมด
 const CreateSchedule = async(req, res, year) => {
     try{
+    
     const user = await User.find()
     for(let i = 0; i< user.length; i++ ){
         //เช็คว่ามีข้อมูลของ ตารางของปีนี้หรือยัง
@@ -13,17 +14,17 @@ const CreateSchedule = async(req, res, year) => {
        const check =  await Duty.findOne({
             _user:uid,
             year:year,
-            month:6
+            month:9
         })
         /// case ที่ไม่มี จะทำการสร้าง ตารางประจำปีขึ้นมา
         if(check === null){
-
+            console.log();
             for(let m = 0;m < daysInSeptember; m++){
                 //สร้างจำนวน Entity ตามจำนวนของเดือน
                 const duty = await Duty.create({
                     _user:uid,
                     year:year,
-                    month:6,
+                    month:9,
                     day:m+1,
                     group:"",
                     morning:0,

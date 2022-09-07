@@ -8,5 +8,8 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.3.8",
     "python-shell": "^3.0.1"
+  },
+  "scripts": {
+    "dev": "npx nodemon main.js"
   }
 }
