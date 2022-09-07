@@ -57,6 +57,21 @@ router.post("/addUser", authMiddleware, async(req, res) => {
     }
 
 })
+router.post("/group", authMiddleware, async (req, res) => {
+    
+    try{
+        const token = req.query.token || req.headers['x-access-token']
+        const pk = verifyToken(token)
+        const uid = pk.user_id.sub
+        const admin = await User.findById(uid)
+        const group = await Group.find({location: admin.location})
+        if(!group || group.length === 0) return res.send({message: "ไม่มีกลุ่ม"})
+        res.send({data: group})
+
+    }catch(error){
+        res.send({message: error})
+    }
+})
 
 router.patch("/updateUser/:userID", authMiddleware, async (req, res) => {
     const { body } = req.body

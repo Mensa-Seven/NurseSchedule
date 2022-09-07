@@ -33,43 +33,47 @@ router.get('/leader/invited', authMiddleware, async (req, res) => {
         const token = req.query.token || req.headers['x-access-token']
         const pk = verifyToken(token)
         const uid = pk.user_id.sub
-
-        const chagnId = req.body.chagnId
-        //req true or false
-        const approve = req.body.approve
-
+        
         //get data invited from nures
-        const Duty = await ChangDuty.findOne({ _leader:uid, member_approve: true, show: false, approve: false })
-        const group1 = await Group.findOne({ _member: Duty.member1 })
-        const group2 = await Group.findOne({ _member: Duty.member2 })
+        //const Dutys = await ChangDuty.findOne({_leader:uid})
 
         //case leader เป็นคนเดียวคนเดียวกัน        
-        if (group1._leader[0] === group2._leader[0]) {
-            await Group.findOne({
-                $and: [
-                    {
-                        _leader: uid,
-                        _member: {
-                            $in: [Dutys.member1, Dutys.member2]
-                        }
+        // await ChangDuty.findOne({_leader: uid})
+        //             .populate('member1')
+        //             .populate('member2')
+        //             .populate('_duty1')
+        //             .populate('member_shift1')
+        //             .populate('_duty2')
+        //             .populate('member_shift2')
+        //             .exec(async function (error, data) {
+        //                 res.send({ data: data })
+        //             })
 
-                    }
-                ]
-            })
-                .then(async function (data, error) {
-                    await ChangDuty.findOne({ _id: chagnId, member_approve: true, show: false, approve: false })
-                        .populate('member1')
-                        .populate('member2')
-                        .populate('_duty1')
-                        .populate('member_shift1')
-                        .populate('_duty2')
-                        .populate('member_shift2')
-                        .exec(async function (error, data) {
-                            res.send({ data: data })
-                        })
-                })
+        // await Group.findOne({
+        //     $and: [
+        //         {   
+        //             _leader: uid,
+        //             _member: {
+        //                 $in: [Dutys.member1, Dutys.member2]
+        //             }
 
-        }
+        //         }
+        //     ]
+        // })
+        //     .then(async function (data, error) {
+        //         await ChangDuty.findOne({_leader: uid,member_approve: true, show: false, approve: false })
+        //             .populate('member1')
+        //             .populate('member2')
+        //             .populate('_duty1')
+        //             .populate('member_shift1')
+        //             .populate('_duty2')
+        //             .populate('member_shift2')
+        //             .exec(async function (error, data) {
+        //                 res.send({ data: data })
+        //             })
+        //     })
+
+    
 
 
 
