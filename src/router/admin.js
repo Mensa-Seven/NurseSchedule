@@ -7,7 +7,6 @@ const Duty = require('../model/Duty.js')
 const Group = require('../model/Group.js')
 const ScheduleGroup = require('../model/ScheduleGroup.js')
 const router = express.Router()
-const { authMiddleware } = require("../middlewares/auth")
 
 
 router.get('/TEST', (req, res) => {
@@ -63,9 +62,9 @@ router.patch("/updateUser/:userID", authMiddleware, async (req, res) => {
     const { body } = req.body
     const { userID } = req.params
 
-    const res = await User.findOneAndUpdate({ _id: userID }, { $set: body })
+    const re = await User.findOneAndUpdate({ _id: userID }, { $set: body })
 
-    if (!res) return res.send("update user incomplete")
+    if (!re) return res.send("update user incomplete")
 
     return res.send("update user success")
 })
@@ -73,8 +72,8 @@ router.patch("/updateUser/:userID", authMiddleware, async (req, res) => {
 router.delete("/deleteUser/:userID", authMiddleware, async (req, res) => {
     const { userID } = req.params
 
-   const res =  await User.findByIdAndDelete(userID)
- if (!res) return res.send("delete user incomplete")
+   const re =  await User.findByIdAndDelete(userID)
+ if (!re) return res.send("delete user incomplete")
     return res.send("delete user success")
 })
 
