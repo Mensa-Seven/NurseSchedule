@@ -6,7 +6,7 @@ const schedule = require('./router/Schedule.js')
 const group = require('./router/group.js')
 const invite = require('./router/invite.js')
 const ChangDuty = require('./router/changduty.js')
-
+const admin = require('./router/admin.js')
 app = express()
 
 app.use(cors('*'))
@@ -18,6 +18,7 @@ app.use("/api/schedule", schedule)
 app.use('/api/group', group)
 app.use('/api/invite', invite)
 app.use('/api/changduty', ChangDuty)
+app.use('/api/admin', admin)
 app.get('/test', (req, res) => {
     res.send({
         message:"Hello World"

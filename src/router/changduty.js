@@ -55,7 +55,7 @@ router.get('/leader/invited', authMiddleware, async (req, res) => {
                 ]
             })
                 .then(async function (data, error) {
-                    await ChangDuty.findOne({ _id: chagnId, member_approve: false, show: true, approve: false })
+                    await ChangDuty.findOne({ _id: chagnId, member_approve: true, show: false, approve: false })
                         .populate('member1')
                         .populate('member2')
                         .populate('_duty1')
@@ -90,7 +90,7 @@ router.patch('/leader/inprove', authMiddleware, async (req, res) => {
 
         const approve = req.body.approve
         const changId = req.body.changId
-        console.log(req.body)
+        
 
         const Dutys = await ChangDuty.findOne({
             $and: [
@@ -187,7 +187,8 @@ router.patch('/inproive', authMiddleware, async (req, res) => {
         if (apporve === false) {
             const chang = await ChangDuty.findOneAndUpdate({ _id: chagnId }
                 , {
-                    member_approve: false
+                    member_approve: false,
+                    show:false
                 })
 
             return res.send({ message: "success" })
@@ -197,6 +198,7 @@ router.patch('/inproive', authMiddleware, async (req, res) => {
             await ChangDuty.updateOne({
                 _id: chagnId
             }, {
+                member_approve:true,
                 show: false
             })
 
