@@ -103,8 +103,7 @@ router.get('/me/present', authMiddleware, async(req, res) => {
     }
 })
 
-router.get('/me/all/:name_group', authMiddleware, async(req, res) => {
-    const {name_group} = req.body.name_group || req.params
+router.get('/me/all', authMiddleware, async(req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     if(!token) return res.send({
         message:"invalid Token"
@@ -115,7 +114,7 @@ router.get('/me/all/:name_group', authMiddleware, async(req, res) => {
         const uid = pk.user_id.sub
         const user = await User.findById(uid)
 
-        const group = await Group.findOne({_member:user._id, location:user.location, name_group:name_group})
+        const group = await Group.findOne({_member:user._id, location:user.location})
         await ScheduleGroup.find({_group:group._id})
         .populate('_group')
         .populate('_user')
