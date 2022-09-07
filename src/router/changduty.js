@@ -39,7 +39,7 @@ router.get('/leader/invited', authMiddleware, async (req, res) => {
         const approve = req.body.approve
 
         //get data invited from nures
-        const Duty = await ChangDuty.findOne({ _id: chagnId, member_approve: true, show: false, approve: false })
+        const Duty = await ChangDuty.findOne({ _leader:uid, member_approve: true, show: false, approve: false })
         const group1 = await Group.findOne({ _member: Duty.member1 })
         const group2 = await Group.findOne({ _member: Duty.member2 })
 
@@ -49,7 +49,9 @@ router.get('/leader/invited', authMiddleware, async (req, res) => {
                 $and: [
                     {
                         _leader: uid,
-                        _member: Duty.member1 || Duty.member2
+                        _member: {
+                            $in: [Dutys.member1, Dutys.member2]
+                        }
 
                     }
                 ]
@@ -261,13 +263,16 @@ router.post('/invite', authMiddleware, async (req, res) => {
     const uid = pk.user_id.sub
     const data = req.body.data
     dutes1 = []
+    
 
     try {
 
         const member1 = data[0]
         const member2 = data[1]
+        const group = await Group.findOne({name_group: member1.group})
 
         await ChangDuty.create({
+            _leader: group._leader[0],
             _group1: member1.group,
             _group2: member2.group,
             member1: member1._user,

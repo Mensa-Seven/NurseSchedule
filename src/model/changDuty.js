@@ -2,6 +2,9 @@ const mongoose = require('mongoose')
 
 
 const ChangDuty = new mongoose.Schema({
+    _leader:[{
+        type:Object
+    }],
     _group1:{
         type: String,
         ref:"Group"
