@@ -27,9 +27,9 @@ router.get("/member", authMiddleware, async (req, res) => {
         const uid = pk.user_id.sub
         
         const user = await User.findById(uid)
-        const memeber = await User.find({location:user.location})
-        if(!memeber || member.length ===0 || member === null) return res.send({message: "ไม่มีสมาชิก"})
-        res.send({members: member})
+        const member = await User.find({location: user.location})
+        if(member.length === 0) return res.send({message: "ไม่มีสมาชิก"})
+        res.send({members : member})
         
     }catch(error){
         res.send({message:error})
