@@ -106,4 +106,16 @@ GET /api/changduty/leader/invited (Token)
 PATCH /api/changduty/leader/inprove (Token)
   - Body approve Bool
   - Body changId String
- 
+
+* ดึงสมาชิกในโรงพยาบาล (แอดมิน)
+
+GET /api/admin/member (Token)
+
+* อัพเดตข้อมูลสมาชิก (แอดมิน)
+PATCH /api/admin/updateUser (Token)
+  - Params userID String
+  - body $set
+
+* เพิ่มสมาชิก (แอดมิน) 
+POST /api/admin/addUser (Token)
+  - Body email String
