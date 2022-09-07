@@ -99,3 +99,8 @@ PUT /api/invite/apporve
 * ดึงคำร้องเเลกเวร (หัวหน้า)
 GET /api/changduty/leader/invited (Token)
   - body chagnId
+* อนุมัติคำร้องเเลกเวร 
+PATCH /api/changduty/leader/inprove (Token)
+  - Body approve Bool
+  - Body changId String
+ 
