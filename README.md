@@ -113,7 +113,7 @@ GET /api/admin/member (Token)
 
 * อัพเดตข้อมูลสมาชิก (แอดมิน)
 PATCH /api/admin/updateUser (Token)
-  - Params userID String
+  
   - body $set
 
 * เพิ่มสมาชิก (แอดมิน) 
