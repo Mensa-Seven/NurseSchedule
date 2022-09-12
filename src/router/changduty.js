@@ -33,49 +33,25 @@ router.get('/leader/invited', authMiddleware, async (req, res) => {
         const token = req.query.token || req.headers['x-access-token']
         const pk = verifyToken(token)
         const uid = pk.user_id.sub
+
         
         //get data invited from nures
-        //const Dutys = await ChangDuty.findOne({_leader:uid})
-
-        //case leader เป็นคนเดียวคนเดียวกัน        
-        // await ChangDuty.findOne({_leader: uid})
-        //             .populate('member1')
-        //             .populate('member2')
-        //             .populate('_duty1')
-        //             .populate('member_shift1')
-        //             .populate('_duty2')
-        //             .populate('member_shift2')
-        //             .exec(async function (error, data) {
-        //                 res.send({ data: data })
-        //             })
-
-        // await Group.findOne({
-        //     $and: [
-        //         {   
-        //             _leader: uid,
-        //             _member: {
-        //                 $in: [Dutys.member1, Dutys.member2]
-        //             }
-
-        //         }
-        //     ]
-        // })
-        //     .then(async function (data, error) {
-        //         await ChangDuty.findOne({_leader: uid,member_approve: true, show: false, approve: false })
-        //             .populate('member1')
-        //             .populate('member2')
-        //             .populate('_duty1')
-        //             .populate('member_shift1')
-        //             .populate('_duty2')
-        //             .populate('member_shift2')
-        //             .exec(async function (error, data) {
-        //                 res.send({ data: data })
-        //             })
-        //     })
-
-    
-
-
+        const Dutys = await ChangDuty.find({_leader: uid}) 
+        if(Dutys.length === 0 ) return res.send({message:"not found"})
+        await ChangDuty.find({
+            _leader: uid
+        })
+        .populate('_leader')
+        .populate('member1')
+        .populate('member2')
+        .populate('_duty1')
+        .populate('member_shift1')
+        .populate('_duty2')
+        .populate('member_shift2')
+        .exec(async function (error, data) {
+            res.send({ data: data })
+        })
+     
 
     } catch (error) {
         res.send({ message: error })

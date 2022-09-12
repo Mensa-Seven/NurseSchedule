@@ -3,7 +3,8 @@ const mongoose = require('mongoose')
 
 const ChangDuty = new mongoose.Schema({
     _leader:{
-        type:Object
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"
     },
     _group1:{
         type: String,

@@ -31,7 +31,7 @@ router.patch('/profile', authMiddleware ,async(req, res) => {
     try{
         const token = req.query.token || req.headers['x-access-token']
         const pk = verifyToken(token)
-      const user =  await User.findByIdAndUpdate({_id:pk.user_id.sub}, 
+        const user =  await User.findByIdAndUpdate({_id:pk.user_id.sub}, 
         {
             $set:req.body
         },
@@ -43,6 +43,7 @@ router.patch('/profile', authMiddleware ,async(req, res) => {
         res.send({
             message:"update success"
         })
+
     }catch( error ){
         res.status(500)
         .json({error})

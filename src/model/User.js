@@ -19,7 +19,6 @@ const User = new mongoose.Schema( {
     actor:{
         type:String,
         default:'พยาบาล'
-
     },
     location:{
         type:String,
