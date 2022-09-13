@@ -75,14 +75,11 @@ router.get("/group", authMiddleware, async (req, res) => {
     }
 })
 
-router.patch("/updateUser", authMiddleware, async (req, res) => {
-    const re = await User.findOneAndUpdate( {
+router.patch("/updateUser/:UserId", async (req, res) => {
+
+    const re = await User.findByIdAndUpdate({_id:req.params.UserId},{
         $set:req.body
-    },
-    {
-        $new:true
-    }
-    )
+    })
 
     if (!re) return res.send("update user incomplete")
 
