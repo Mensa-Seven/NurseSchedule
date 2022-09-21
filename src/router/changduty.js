@@ -136,20 +136,31 @@ router.patch('/leader/inprove', authMiddleware, async (req, res) => {
         const shift_2 = Dutys.member_shift2[0]
       
 
-        Object.keys(shift_1).forEach( key => {
-            memberDuty1[key] = 0
-            memberDuty2[key] = 1
-        })
-         
         Object.keys(shift_2).forEach( key => {
             memberDuty1[key] = 1
             memberDuty2[key] = 0
         })
 
+        Object.keys(shift_1).forEach( key => {
+            memberDuty1[key] = 0
+            memberDuty2[key] = 1
+        })
+         
+       
+
         memberDuty1.count = countShift(memberDuty1)
         memberDuty2.count = countShift(memberDuty2)
+
+        console.log({
+            shift_1,
+            shift_2,
+            memberDuty1,
+            memberDuty2
+        })
       
         await Promise.all([memberDuty1.save(), memberDuty2.save()])
+
+        console.log()
 
         return res.send(group)
 

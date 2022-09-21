@@ -19,10 +19,8 @@ app.use('/api/group', group)
 app.use('/api/invite', invite)
 app.use('/api/changduty', ChangDuty)
 app.use('/api/admin', admin)
-app.get('/test', (req, res) => {
-    res.send({
-        message:"Hello World"
-    })
-})
+
+
+
 module.exports = app
 
