@@ -120,3 +120,14 @@ PATCH /api/admin/updateUser (Token)
 POST /api/admin/addUser (Token)
   - Body email String
 
+
+* สร้างคำขอลา (พยาบาล)
+POST /api/req/take/leave (Token)
+  - Body type String
+  - Body detail String
+  - Body _duty String
+  - Body shift Object
+  
+* ดูคำรองของตัวเองที่ส่งไป (พยาบาล)
+GET  /api/req/take/leave (Token)
+
