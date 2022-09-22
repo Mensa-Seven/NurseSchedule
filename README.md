@@ -131,3 +131,7 @@ POST /api/req/take/leave (Token)
 * ดูคำรองของตัวเองที่ส่งไป (พยาบาล)
 GET  /api/req/take/leave (Token)
 
+* ตอบรับคำลา
+PATCH /leader/take/leave/approve
+  - Body requestID String
+  - Body approve Boolean
