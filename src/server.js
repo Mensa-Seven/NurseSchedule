@@ -7,6 +7,7 @@ const group = require('./router/group.js')
 const invite = require('./router/invite.js')
 const ChangDuty = require('./router/changduty.js')
 const admin = require('./router/admin.js')
+const Request = require('./router/request.js')
 app = express()
 
 app.use(cors('*'))
@@ -19,7 +20,7 @@ app.use('/api/group', group)
 app.use('/api/invite', invite)
 app.use('/api/changduty', ChangDuty)
 app.use('/api/admin', admin)
-
+app.use('/api/req', Request)
 
 
 module.exports = app

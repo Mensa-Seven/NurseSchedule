@@ -16,6 +16,10 @@ const Group = new mongoose.Schema({
             ref:"User"
         }
     ]
+    ,
+    auto_approve:{
+        type:Boolean
+    }
 })
 
 
