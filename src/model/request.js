@@ -3,6 +3,9 @@ const User = require('./User.js')
 const Duty = require('./Duty.js')
 
 const Request = new mongoose.Schema( {
+    location: {
+        type: String
+    },
     _user:{
         type:mongoose.Schema.Types.ObjectId,
         ref:User
