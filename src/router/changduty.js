@@ -160,7 +160,6 @@ router.patch('/leader/inprove', authMiddleware, async (req, res) => {
       
         await Promise.all([memberDuty1.save(), memberDuty2.save()])
 
-        console.log()
 
         return res.send(group)
 
@@ -197,7 +196,6 @@ router.patch('/inproive', authMiddleware, async (req, res) => {
             })
 
             return res.send({ message: "success" })
-
 
         }
 

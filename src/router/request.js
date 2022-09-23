@@ -87,8 +87,11 @@ router.get('/leader/take/leave', authMiddleware, async (req, res) =>{
 
     try{
         const user = await User.findById(uid)
-        const request = await Request.find({location: user.location})
-        res.send({data:request})
+        await Request.find({location: user.location})
+        .populate('_user')
+        .exec(async function(error, data){
+            res.send({data: data})
+        })
 
     }catch(error){
         res.send({
