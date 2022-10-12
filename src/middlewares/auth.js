@@ -7,7 +7,11 @@ const authMiddleware = async (req, res, next) => {
 	if(!token) return res.send("Invalid Toekn")
 	
 	try {
+
+
 		const decoded = verifyToken(token, req, res)
+
+		console.log(decoded, token)
 
 		
 		result = decoded.user_id
@@ -21,9 +25,11 @@ const authMiddleware = async (req, res, next) => {
 		next()
 		
 	} catch (error) {
+
 		res.status(401).send(
 			{
-				message:"Unauthorized"
+				message:"Unauthorized",
+				error: error.message
 			}
 		)
 	}

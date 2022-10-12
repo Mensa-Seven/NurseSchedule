@@ -106,9 +106,6 @@ router.put('/apporve', authMiddleware, async (req, res) => {
         }
             
 
-     
-
-
     }catch(error){
         res.send(error)
     }

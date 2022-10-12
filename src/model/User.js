@@ -22,7 +22,7 @@ const User = new mongoose.Schema( {
     },
     location:{
         type:String,
-        default:""
+        default:"" 
     },
     tokenVersion:{
         type:Number,
@@ -31,4 +31,6 @@ const User = new mongoose.Schema( {
         type:Date
     }
 } )
+
 module.exports = mongoose.model('User', User)
+

@@ -6,10 +6,11 @@ const authMiddleware = require('../middlewares/auth.js')
 const Duty = require('../model/Duty.js')
 const Group = require('../model/Group.js')
 const ScheduleGroup = require('../model/ScheduleGroup.js')
-const { findById, find, populate, findOne } = require('../model/User.js')
+const { findById, find, populate, findOne, count } = require('../model/User.js')
 const router = express.Router()
 const date = new Date()
 const runPy = require("../utils/runPy.js")
+const Notification = require("../model/Notification")
 
 
 
@@ -18,10 +19,14 @@ router.get('/test', (req, res) => {
 })
 
 
-router.patch("/create/auto/:groupId", async (req, res) => {
+router.patch("/create/auto/:groupId", authMiddleware,async (req, res) => {
+    const token = req.query.token || req.headers['x-access-token']
+    const pk = verifyToken(token)
+    const uid = pk.user_id.sub
 
     const year = date.getFullYear().toString()
     const { groupId } = req.params || req.body
+    const { leaderId } = req.body
 
     if (!groupId) return res.send("Invalid group id")
 
@@ -85,9 +90,48 @@ router.patch("/create/auto/:groupId", async (req, res) => {
             })
         })
     }
+    // user2 --> 
+    // duties.count === new_duties.count
+    // user:{
+    //     duty:[
+    //         day1,
+    //         day2
+    //     ]
+    // }
+
+    // nof.push()
+
+    // console.log(duties)
+
+    const isDiffUserDuty = async (userId, duty) => {
+        const prev = await Duty.findOne({
+            $and: [
+                { _user: userId },
+                { day: duty.day },
+                { month: date.getMonth() + 1 },
+                { year: year },
+            ]
+        }).populate("_user").lean()
+        // ลองยิง POSTMAN หน่อย
+
+        // console.log(prev)
+
+        // if (!prev) return console.log("NULL", [userId, duty.day, date.getMonth() + 1, year])
+        if (!prev) return null
+        if (prev.count !== duty.count) return { prev, duty }
+    }
+
+    const diffDuty = (await Promise.all(duties.map(async duty => {
+        return await isDiffUserDuty(duty._user, duty)
+    }))).filter(Boolean)
+
+
+    console.log(diffDuty.length)
+
+
 
     // loop update duty filter by _user and day and year
-    await Promise.all(duties.map((duty) => Duty.updateOne({
+    await Promise.all(diffDuty.map(({ duty }) => Duty.updateOne({
         $and: [
             {
                 _user: duty._user
@@ -99,10 +143,56 @@ router.patch("/create/auto/:groupId", async (req, res) => {
                 year: year
             },
             {
-                month:date.getMonth() + 1
+                month: date.getMonth() + 1
             }
         ]
     }, { $set: duty })))
+
+
+    // Save noti
+    /* 
+        {
+            type: "CHANGE_DUTY" | "REQUEST_DUTY"
+            "approve_by": หัวหน้า B
+            fields: {}
+        }
+
+        {
+            type: "CHANGE_DUTY"
+            "approve_by": หัวหน้า B
+            fields: {
+                from
+            }
+        }
+    */
+    // ขอลา
+    // ขอคำอนุมัติ ลบกลุ่ม
+    // การเปลี่ยนแปลงตาราง
+
+
+    const approveBy = await User.findById(uid).lean()
+
+    const noti = diffDuty.map((duty) => {
+        const user = duty.prev._user
+        delete duty.prev._user
+        return {
+            type: "CHANGE_DUTY",
+            approve_by: approveBy,
+            _user: user,
+            fields: {
+                ...duty,
+                group
+            }
+        }
+    })
+
+    console.log(JSON.stringify(noti, null, 1))
+
+    // console.log(duties)
+
+    await Promise.all(
+        noti.map(item => Notification.create(item))
+    )
 
     res.send("Success")
 
@@ -115,13 +205,13 @@ router.get('/list/me/all', authMiddleware, async (req, res) => {
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
 
-    try{
-        await Group.find({ _member:uid})
-        .then(async function(data){
-            res.send(data)
-        })
+    try {
+        await Group.find({ _member: uid })
+            .then(async function (data) {
+                res.send(data)
+            })
 
-    }catch(error){
+    } catch (error) {
         res.send(error)
     }
 })
@@ -161,32 +251,36 @@ router.get('/me/member', authMiddleware, async (req, res) => {
 
 /// ดึงข้อมูลตารงทั้งหมดที่เราอยู่ในกลุ่ม
 router.get('/schedule/without/me', authMiddleware, async (req, res) => {
+
+    //ดึงตารางสมาขชิกทั้งหมด ที่อยู่ รพ  ของตัวเองมา ยงเว้นตารางของตัวเอง
+
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
+
     const user = await User.findById(uid)
-    const listMember = []
-    const location = await User.find({location:user.location})
-    location.forEach(element => listMember.push(element._id))
 
     try {
-        await ScheduleGroup.find({
-            _user:{
-                $gt:uid
-            },
-            location:location
-            
-        })
-        .populate('_duty')
-        .populate('_user')
-        .exec(function (error, data) {
-            res.send({ duty: data })
-        })
+        console.log(user._id)
+        const group = await Group.findOne({
+            _member: {
+                $in: [user._id]
+            }
+        }).lean()
+
+        const scheduleGroup = await Promise.all(group._member.filter(m => m.toString() !== user._id.toString()).map(m => ScheduleGroup.findOne({ _user: m }).populate(["_duty", "_user"])))
+
+        console.log(scheduleGroup.length)
+
+        res.send({ duty: scheduleGroup })
 
     } catch (error) {
+        console.log(error)
         res.send(error)
     }
 })
+
+
 
 router.get('/schedule/me/all/:name_group', authMiddleware, async (req, res) => {
 
@@ -198,20 +292,20 @@ router.get('/schedule/me/all/:name_group', authMiddleware, async (req, res) => {
     try {
         const leader = await User.findById(uid)
         const group = await Group.findOne({
-            _member:uid,
-            location:leader.location,
-            name_group:req.params.name_group || req.body.name_group
-            
+            _member: uid,
+            location: leader.location,
+            name_group: req.params.name_group || req.body.name_group
+
         })
         console.log(group._id);
-        const schdule = await ScheduleGroup.find({_group:group._id})
-        .populate('_duty')
-        .populate('_user')
-        .exec(function(error, data){
-            res.send(data)
-        })
-            
-        
+        const schdule = await ScheduleGroup.find({ _group: group._id })
+            .populate('_duty')
+            .populate('_user')
+            .exec(function (error, data) {
+                res.send(data)
+            })
+
+
     } catch (error) {
         res.send({
             error: error
@@ -219,36 +313,37 @@ router.get('/schedule/me/all/:name_group', authMiddleware, async (req, res) => {
     }
 })
 
-router.get('/list/member/location', authMiddleware, async(req, res) => {
+// ดึงสมาชิกใน รพ ตัวเอง ไม่มีตัวเอง
+router.get('/list/member/location', authMiddleware, async (req, res) => {
+
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
-    try{
-        await User.findById(uid)
-        .then(async function(data, error){
-            //ใช้ค้นหา User เพื่อเอา location
-        
-            await User.find({
-                _id:{
-                    $gt:data._id
+    try {
+        const user = await User.findById(uid)
+
+        const users = await User.find({
+            $and: [
+                {
+                    location: user.location
                 },
-                location:data.location
-            })
-            .then(async function(data, error){
-                if(data){
-                    res.send({data:data})
-                }else{
-                    res.send({message:"ไม่พบสมาชิก"})
+                {
+                    _id: { $ne: user._id }
                 }
-
-            })
-        })
-        .catch(err => {
-            console.log(err);
+            ]
         })
 
-    }catch(error){
-        res.send({error})
+        console.log(uid)
+
+        console.log(users.length)
+
+        res.send(users)
+        // const member = await User.find({ _id: { $lt: leader._id }, location: leader.location })
+        // if (member.length == 0) return res.send({ message: "not found" })
+        // res.send({ data: member })
+
+    } catch (error) {
+        res.send({ error })
     }
 })
 
@@ -258,31 +353,37 @@ router.delete('/removemember', authMiddleware, async (req, res) => {
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
 
-    try{
-        const userId = req.body.userId
+    try {
+        const email = req.body.email
         const groupId = req.body.groupId
-       
+
+        const user = await User.findOne({ email: email })
+
         const group = await Group.findOne({
             _id: groupId,
-            _member: userId
+            _member: user._id
         })
-        await Group.findOneAndUpdate({
-            _id: groupId,
-            _member: userId
-        },
-        {
-            $pull:{
-                _member:userId
-            }
-        })
-        await ScheduleGroup.deleteOne({
-            _group: groupId,
-            _user: userId
-        })
-        res.send({message: "Success"})
-    
+        if (group !== null) {
+            await Group.findOneAndUpdate({
+                _id: groupId,
+                _member: user._id
+            },
+                {
+                    $pull: {
+                        _member: user._id
+                    }
+                })
+            await ScheduleGroup.deleteOne({
+                _group: groupId,
+                _user: user._id
+            })
+            res.send({ message: "Success" })
 
-    }catch(error){
+        }
+
+
+
+    } catch (error) {
         res.send(error)
     }
 })
@@ -292,29 +393,29 @@ router.put('/addmember', authMiddleware, async (req, res) => {
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
     const duties = []
-    
-    try{
-        if(!req.body.email) return res.send({message:"ไม่ได้กำหนด email"})
-        if(!req.body.name_group) return res.send({message:"ไม่ได้กำหนด name_group"})
-        const leader = await User.findById(uid)
-        const user = await User.findOne({email:req.body.email, location:leader.location})
-        const group = await Group.findOne({name_group:req.body.name_group, location:leader.location})
-        // ค้นว่าพบข้อมูล กลุ่มหรือไม่
-        if(!group) return res.send({message:"ไม่พบข้อมูล"}) 
-        if(!user) return res.send({message:"ไม่สามารถเพิ่มสมาชิกได้"})
-        
-        const findGroup = await Group.findOne({_id:group._id, _member:user._id})
-        if(findGroup){
-            res.send({message:"ผู้ใช้งานนี้อยู่ในหวอดอยู่เเล้ว"})
-        }else{
 
-            await Group.findOneAndUpdate({_id:group._id},
+    try {
+        if (!req.body.email) return res.send({ message: "ไม่ได้กำหนด email" })
+        if (!req.body.name_group) return res.send({ message: "ไม่ได้กำหนด name_group" })
+        const leader = await User.findById(uid)
+        const user = await User.findOne({ email: req.body.email, location: leader.location })
+        const group = await Group.findOne({ name_group: req.body.name_group, location: leader.location })
+        // ค้นว่าพบข้อมูล กลุ่มหรือไม่
+        if (!group) return res.send({ message: "ไม่พบข้อมูล" })
+        if (!user) return res.send({ message: "ไม่สามารถเพิ่มสมาชิกได้" })
+
+        const findGroup = await Group.findOne({ _id: group._id, _member: user._id })
+        if (findGroup) {
+            res.send({ message: "ผู้ใช้งานนี้อยู่ในหวอดอยู่เเล้ว" })
+        } else {
+
+            await Group.findOneAndUpdate({ _id: group._id },
                 {
-                    $push:{
-                        _member:user._id
+                    $push: {
+                        _member: user._id
                     }
                 })
-                .then(async() => {
+                .then(async () => {
                     await ScheduleGroup.create({
                         _group: group._id,
                         _user: user._id,
@@ -323,33 +424,33 @@ router.put('/addmember', authMiddleware, async (req, res) => {
                     const duty = await Duty.find({
                         _user: user._id,
                         year: date.getFullYear(),
-                        month: date.getMonth() +1
+                        month: date.getMonth() + 1
                     })
-                    
+
                     await duty.forEach(async element => {
-                            duties.push(element._id)
-                        })
-                    
-                        await ScheduleGroup.updateOne({
-                            $and:[
-                                {
-                                    _group:group._id
-                                },
-                                {
-                                    _user:user._id
-                                }
-                            ]
-                        }, {$push:{ _duty:duties}} )
+                        duties.push(element._id)
+                    })
+
+                    await ScheduleGroup.updateOne({
+                        $and: [
+                            {
+                                _group: group._id
+                            },
+                            {
+                                _user: user._id
+                            }
+                        ]
+                    }, { $push: { _duty: duties } })
 
                 })
 
-        
-                res.send({message:"Success"})
+
+            res.send({ message: "Success" })
         }
 
-        
 
-    }catch(error){
+
+    } catch (error) {
         res.send(error)
     }
 
@@ -360,44 +461,44 @@ router.delete('/me/remove', authMiddleware, async (req, res) => {
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
 
-    try{
+    try {
         const leader = await User.findById(uid)
-        const user = await User.findOne({email:req.body.email, location:leader.location})
-        const group = await Group.findOne({name_group:req.body.name_group, location:leader.location})
-        
-       console.log(group);
-       console.log(user);
-       const updateGroup = await Group.findOneAndUpdate({_id:group._id, _member:user._id},
-        {
-            $pull:{
-                _member:user._id
-            }
-        })
-        .then(async ( ) => {
-            const dutys = await Duty.find({
-                _user: uid,
-                year: date.getFullYear(),
-                month: date.getMonth() +1 ,
-                group:req.body.name_group
+        const user = await User.findOne({ email: req.body.email, location: leader.location })
+        const group = await Group.findOne({ name_group: req.body.name_group, location: leader.location })
+
+        console.log(group);
+        console.log(user);
+        const updateGroup = await Group.findOneAndUpdate({ _id: group._id, _member: user._id },
+            {
+                $pull: {
+                    _member: user._id
+                }
+            })
+            .then(async () => {
+                const dutys = await Duty.find({
+                    _user: uid,
+                    year: date.getFullYear(),
+                    month: date.getMonth() + 1,
+                    group: req.body.name_group
+                })
+
+                await Promise.all(dutys.map((duty) => Duty.updateOne({
+                    $and: [
+                        {
+                            _user: duty._user
+                        },
+                        {
+                            day: duty.day
+                        },
+                        {
+                            year: year
+                        }
+                    ]
+                }, { $set: duty })))
+
             })
 
-            await Promise.all(dutys.map((duty) => Duty.updateOne({
-                $and: [
-                    {
-                        _user: duty._user
-                    },
-                    {
-                        day: duty.day
-                    },
-                    {
-                        year: year
-                    }
-                ]
-            }, { $set: duty })))
-        
-        })
-
-    }catch(error){
+    } catch (error) {
         res.send(error)
     }
 
@@ -445,16 +546,16 @@ router.post('/create', authMiddleware, async (req, res) => {
                     duties.push(element._id)
                 })
                 await ScheduleGroup.updateOne({
-                    $and:[
+                    $and: [
                         {
-                            _group:data._id
+                            _group: data._id
                         },
                         {
-                            _user:user._id
+                            _user: user._id
                         }
                     ]
-                }, {$push:{ _duty:duties}} )
-             
+                }, { $push: { _duty: duties } })
+
 
                 res.send({ group: data })
             })
