@@ -6,7 +6,13 @@ module.exports = `
         bark: String
         users: [User]
         user(_id: ID!): User
-        notifications: [Notification] 
+        notifications(filter: JSON): [Notification] 
+    }
+
+    type Mutation {
+        deleteGroup(input: DeleteGroupInput!): String
+        approveDeleteGroup(input: ApproveDeleteGroupInput!): String
+        updateGroup(input: UpdateGroupInput!): Group
     }
 
     type User {
@@ -30,6 +36,7 @@ module.exports = `
         _leader: String
         _member: [String]
         auto_approve: Boolean
+        limit: Int
 
         ### nested
         leader: User
@@ -47,4 +54,21 @@ module.exports = `
         ### nested
         user: User
     }
+
+    input DeleteGroupInput {
+        groupId: ID!
+    }
+
+    input ApproveDeleteGroupInput {
+        notificationId: ID!
+    }
+
+    input UpdateGroupInput {
+        _id: ID!
+        location: String
+        name_group: String
+        auto_approve: Boolean
+        limit: Int
+    }
+   
 `

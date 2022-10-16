@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const Notification = new mongoose.Schema( {
     type: {
-        type: String // "CHANGE_DUTY" | "REQUEST_DUTY"
+        type: String // "CHANGE_DUTY" | "REQUEST_DUTY" | "DELETE_GROUP"
     },
     approve_by: {
         type: mongoose.Schema.Types.ObjectId,

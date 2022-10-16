@@ -42,6 +42,5 @@ const apollo = new ApolloServer({
 })
 
 
-
 module.exports = { app, apollo }
 
