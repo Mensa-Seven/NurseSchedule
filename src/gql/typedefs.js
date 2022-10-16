@@ -13,6 +13,9 @@ module.exports = `
         deleteGroup(input: DeleteGroupInput!): String
         approveDeleteGroup(input: ApproveDeleteGroupInput!): String
         updateGroup(input: UpdateGroupInput!): Group
+        createLeave(input: CreateLeaveInput!): JSON
+        approveLeaveMember(input: ApproveLeaveMemberInput!): JSON
+        approveLeaveLeader(input: ApproveLeaveLeaderInput!): JSON
     }
 
     type User {
@@ -69,6 +72,22 @@ module.exports = `
         name_group: String
         auto_approve: Boolean
         limit: Int
+    }
+
+    input CreateLeaveInput {
+        memberIds: [ID!]!
+        dutyId: ID!
+        shift: JSON
+    }
+
+    input ApproveLeaveMemberInput {
+        notificationId: ID!
+        approve: Boolean!
+    }
+
+    input ApproveLeaveLeaderInput {
+        notificationId: ID!
+        approve: Boolean!
     }
    
 `

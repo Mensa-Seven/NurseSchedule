@@ -2,6 +2,7 @@ const User = require("../model/User")
 const Group = require("../model/Group")
 const Notification = require("../model/Notification")
 const jwt = require("jsonwebtoken")
+const Duty = require("../model/Duty")
 
 function requiredAuth({ authorization }) {
     return jwt.verify(authorization, process.env.JWT_SECRET)
@@ -61,6 +62,73 @@ module.exports = {
             await Group.updateOne({ _id }, { $set: body })
 
             return await Group.findById(_id)
+        },
+        createLeave: async (_, { input }, context) => {
+            const decoded = requiredAuth(context)
+            const { memberIds, dutyId, shift } = input
+            const duty = await Duty.findById(dutyId)
+            const group = await Group.findOne(duty.name_group)
+
+            const response = await Promise.all(memberIds.map(id => Notification.create({
+                type: "LEAVE_DUTY",
+                _user: id,
+                fields: {
+                    createdBy: decoded.user_id.sub,
+                    dutyId: dutyId,
+                    shift: shift,
+                    approve: false,
+                    leader: group._leader[0].toString()
+                }
+            })))
+
+            return response
+        },
+        approveLeaveMember: async (_, { input }, context) => {
+            const decoded = requiredAuth(context)
+
+            const { notificationId, approve } = input
+            const noti = await Notification.findById(notificationId).lean()
+
+            const data = { ...noti, approve_by: decoded.user_id.sub, }
+            data.fields.approve = approve
+
+            const response = await Notification.updateOne({ _id: notificationId }, { $set: data })
+            return response
+        },
+        approveLeaveLeader: async (_, { input }, context) => {
+            const decoded = requiredAuth(context)
+
+            const { notificationId, approve } = input
+            const noti = await Notification.findById(notificationId).lean()
+            noti.noift = "2"
+
+            const { dutyId, shift, createdBy } = noti.fields
+
+
+            const duty = await Duty.findById(dutyId).lean()
+            console.log(noti.fields)
+            console.log(duty)
+
+            // console.log(duty, noti.fields)
+            const group = await Group.findOne({name_group: duty.group})
+
+            const newDuty = JSON.parse(JSON.stringify(duty))
+
+            Object.keys(shift).forEach(key => {
+                newDuty[key] = 0
+            })
+
+            const changeNoti = {
+                type: "CHANGE_DUTY",
+                _user: createdBy,
+                approve_by: decoded.user_id.sub,
+                fields: {
+                    prev: duty,
+                    duty: newDuty,
+                    group: group
+                }
+            }
+            return await Notification.create(changeNoti)
         }
     },
     User: {
@@ -84,5 +152,6 @@ module.exports = {
         approve_by: async (root) => await User.findById(root.approve_by),
         user: async (root) => await User.findById(root._user),
     },
+
 
 }
