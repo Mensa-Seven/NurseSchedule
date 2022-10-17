@@ -25,6 +25,7 @@ module.exports = {
         }
     },
     Mutation: {
+
         deleteGroup: async (_, { input }, ctx) => {
             const decoded = requiredAuth(ctx)
             const user = await User.findById(decoded.user_id.sub)
@@ -40,14 +41,20 @@ module.exports = {
             await Notification.create(noti)
             return "OK"
         },
+
         approveDeleteGroup: async (_, { input }, ctx) => {
             const decoded = requiredAuth(ctx)
             const noti = await Notification.findById(input.notificationId)
-            const groupId = noti.fields.group._id
 
-            await Group.updateOne({ _id: groupId }, { $set: { deleted: true } })
+            
+            const groupId = noti.fields.group._id
+            console.log(decoded);
+            const update =  await Group.updateOne({ _id: groupId }, { $set: { deleted: true } })
             await Notification.updateOne({ _id: input.notificationId }, { $set: { approve_by: decoded.user_id.sub } })
+
+            return update
         },
+
         updateGroup: async (_, { input }) => {
             const { _id, ...body } = input
             const group = await Group.findById(_id)
@@ -102,8 +109,6 @@ module.exports = {
 
 
             const duty = await Duty.findById(dutyId).lean()
-            console.log(noti.fields)
-            console.log(duty)
 
             // console.log(duty, noti.fields)
             const group = await Group.findOne({name_group: duty.group})

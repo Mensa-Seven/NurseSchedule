@@ -64,6 +64,7 @@ module.exports = `
 
     input ApproveDeleteGroupInput {
         notificationId: ID!
+        approve: Boolean
     }
 
     input UpdateGroupInput {

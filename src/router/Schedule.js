@@ -91,7 +91,7 @@ router.patch('/update/schedule', authMiddleware, async (req, res) => {
 
         console.log(JSON.stringify(diffDuty, null, 2))
 
-        await Promise.all(diffDuty.map(({ duty }) => Duty.updateOne({
+        await Promise.all(duties.map(({ duty }) => Duty.updateOne({
             $and: [
                 {
                     _user: duty._user
