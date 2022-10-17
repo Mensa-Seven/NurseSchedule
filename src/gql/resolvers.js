@@ -27,21 +27,17 @@ module.exports = {
     Mutation: {
         deleteGroup: async (_, { input }, ctx) => {
             const decoded = requiredAuth(ctx)
-            console.log(decoded)
             const user = await User.findById(decoded.user_id.sub)
             const group = await Group.findById(input.groupId)
-
+            
             const noti = {
                 type: "DELETE_GROUP",
-                _user: user._id,
+                _user: "63281616042a723f63a3be27",
                 fields: {
-                    location: user.location,
                     group
                 }
             }
-
             await Notification.create(noti)
-            console.log(noti)
             return "OK"
         },
         approveDeleteGroup: async (_, { input }, ctx) => {
