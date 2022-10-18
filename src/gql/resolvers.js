@@ -45,14 +45,14 @@ module.exports = {
         approveDeleteGroup: async (_, { input }, ctx) => {
             const decoded = requiredAuth(ctx)
             const noti = await Notification.findById(input.notificationId)
-
+            
             
             const groupId = noti.fields.group._id
-            console.log(decoded);
-            const update =  await Group.updateOne({ _id: groupId }, { $set: { deleted: true } })
-            await Notification.updateOne({ _id: input.notificationId }, { $set: { approve_by: decoded.user_id.sub } })
-
-            return update
+            const group = await Group.updateOne({ _id: groupId },  { deleted: true  })
+            const update_new = await Notification.updateOne({ _id: input.notificationId }, { $set: { approve_by: decoded.user_id.sub , noift:'2'} })
+            
+            return "OK"
+            
         },
 
         updateGroup: async (_, { input }) => {
@@ -86,6 +86,7 @@ module.exports = {
 
             return response
         },
+
         approveLeaveMember: async (_, { input }, context) => {
             const decoded = requiredAuth(context)
 
@@ -98,6 +99,7 @@ module.exports = {
             const response = await Notification.updateOne({ _id: notificationId }, { $set: data })
             return response
         },
+        
         approveLeaveLeader: async (_, { input }, context) => {
             const decoded = requiredAuth(context)
 

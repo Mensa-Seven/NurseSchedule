@@ -60,6 +60,7 @@ module.exports = `
 
     input DeleteGroupInput {
         groupId: ID!
+        approve: Boolean
     }
 
     input ApproveDeleteGroupInput {
