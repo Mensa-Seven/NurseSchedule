@@ -77,7 +77,7 @@ module.exports = {
                 _user: id,
                 fields: {
                     createdBy: user,
-                    dutyId: dutyId,
+                    dutyId: duty,
                     shift: shift,
                     approve: false,
                     leader: group._leader[0].toString()
@@ -129,7 +129,8 @@ module.exports = {
                     prev: duty,
                     duty: newDuty,
                     group: group
-                }
+                },
+                noift:'2'
             }
             return await Notification.create(changeNoti)
         }
