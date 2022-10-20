@@ -94,7 +94,7 @@ module.exports = {
             const { notificationId, approve } = input
             const noti = await Notification.findById(notificationId).lean()
 
-            const data = { ...noti, approve_by: decoded.user_id.sub, }
+            const data = { ...noti, approve_by: decoded.user_id.sub,noift:'2' }
             data.fields.approve = approve
 
             const response = await Notification.updateOne({ _id: notificationId }, { $set: data })
@@ -112,7 +112,7 @@ module.exports = {
 
 
             const duty = await Duty.findById(dutyId).lean()
-
+           
             // console.log(duty, noti.fields)
             const group = await Group.findOne({name_group: duty.group})
 
@@ -130,7 +130,7 @@ module.exports = {
                     prev: duty,
                     duty: newDuty,
                     group: group
-                },
+                }
             
             }
             return await Notification.create(changeNoti)
