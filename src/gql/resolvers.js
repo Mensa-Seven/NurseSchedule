@@ -71,12 +71,12 @@ module.exports = {
             const { memberIds, dutyId, shift } = input
             const duty = await Duty.findById(dutyId)
             const group = await Group.findOne(duty.name_group)
-
+            const user = await User.findById(decoded.user_id.sub)
             const response = await Promise.all(memberIds.map(id => Notification.create({
                 type: "LEAVE_DUTY",
                 _user: id,
                 fields: {
-                    createdBy: decoded.user_id.sub,
+                    createdBy: user,
                     dutyId: dutyId,
                     shift: shift,
                     approve: false,

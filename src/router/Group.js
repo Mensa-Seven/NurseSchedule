@@ -400,8 +400,10 @@ router.put('/addmember', authMiddleware, async (req, res) => {
         const leader = await User.findById(uid)
         const user = await User.findOne({ email: req.body.email, location: leader.location })
         const group = await Group.findOne({ name_group: req.body.name_group, location: leader.location })
+
         // ค้นว่าพบข้อมูล กลุ่มหรือไม่
         if (!group) return res.send({ message: "ไม่พบข้อมูล" })
+
         if (!user) return res.send({ message: "ไม่สามารถเพิ่มสมาชิกได้" })
 
         const findGroup = await Group.findOne({ _id: group._id, _member: user._id })
