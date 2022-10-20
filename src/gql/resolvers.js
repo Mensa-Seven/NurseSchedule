@@ -77,7 +77,7 @@ module.exports = {
                 _user: id,
                 fields: {
                     createdBy: user,
-                    dutyId: duty,
+                    duty: duty,
                     shift: shift,
                     approve: false,
                     leader: group._leader[0].toString()

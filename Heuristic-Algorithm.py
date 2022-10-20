@@ -2,7 +2,7 @@ import numpy as np
 import sys
 
 class Schedule(object):
-    def __init__(self, nurse, day):
+    def __init__(self, nurse, day, shift = 20):
         ''' กำหนด constructor ของการสร้างตาราง '''
         #เก็บข้อมูลพยาบาล
         self._nurse = nurse
@@ -19,6 +19,8 @@ class Schedule(object):
         self.countConsecutive = 0
         self._shiftFrame = None
         self._week = 4
+        self.shift = shift
+
 
 
     def Population(self, size):
@@ -104,18 +106,17 @@ class Schedule(object):
 
 class ContsTraint(Schedule):
     ''' คลาสนี้จะทำการสร้าง กฎต่างๆหรือ ContsTrint เเล้วทำการปรับข้อมูลตาราง'''
-    def __init__(self, nurse, day):
-        super().__init__(nurse, day)
-        Schedule.__init__(self, nurse, day)
+    def __init__(self, nurse, day, shift):
+        super().__init__(nurse, day, shift)
+        Schedule.__init__(self, nurse, day, shift)
 
     def ShiftLimit(self):
         ''' หนึ่งคนในหนึ่งสัปดาห์ต้องเข้าผลัดไม่เกิน 6 ผลัด ถ้าเกินให้สุ่มค่า Population ใหม่จนกว่าจะไม่เกิน'''
 
         for index, nurse in enumerate(self._countWeek):
             for i in range(self._week):
-                while self._countWeek[nurse][f'countWeek({i+1})'] > 5:
-                    pop = self.Population(size = 7)
-                    self._nuresSchedule[nurse][f"shiftWeek({i+1})"] = pop
+                while self._countWeek[nurse][f'countWeek({i+1})'] > 6:
+                    self._nuresSchedule[nurse][f"shiftWeek({i+1})"] = np.random.randint(2, size = 21)
                     self.CountWeek()
 
 
@@ -136,7 +137,8 @@ class ContsTraint(Schedule):
 
         if shift == "1 1 1" or shift == "0 1 1":
             newShift =  np.random.randint(len(shiftDream), size = 1)
-            self._nuresSchedule[nurse][week][index:window] = shiftDream[newShift[0]]
+            self._nuresSchedule[nurse][week][index:window] = np.random.randint(2, size = 3)
+
 
     def LastDay(self):
         """ วันขึ้นวันใหม่กับวันสุดท้ายของสัปดาห์"""
@@ -158,12 +160,10 @@ class ContsTraint(Schedule):
                 oldWeek = str(oldWeek).strip("[, ]")
 
                 if oldWeek == "0 0 1" and newWeek == "1 1 0":
-                    newShifts =  np.random.randint(len(shiftDream), size = 1)
-                    self._nuresSchedule[nurse][f'shiftWeek({countWeek +1})'][:3] = shiftDream[newShifts[0]]
+                    self._nuresSchedule[nurse][f'shiftWeek({countWeek +1})'][:3] = np.random.randint(2, size = 3)
 
                 if oldWeek == "1 0 1" and newWeek == "1 1 0":
-                    newShifts =  np.random.randint(len(shiftDream), size = 1)
-                    self._nuresSchedule[nurse][f'shiftWeek({countWeek +1})'][:3] = shiftDream[newShifts[0]]
+                    self._nuresSchedule[nurse][f'shiftWeek({countWeek +1})'][:3] = np.random.randint(2, size = 3)
 
                 countWeek +=1
                 if countWeek >3 :
@@ -172,27 +172,42 @@ class ContsTraint(Schedule):
 
 class SolutionCase(ContsTraint):
     """ class นี้เอาจัดการเรื่องของ case ต่าง ๆ ที่สร้างขึ้นมา"""
-    def __init__(self, nurse, day):
-        super().__init__(nurse, day)
-        ContsTraint.__init__(self, nurse, day)
+    def __init__(self, nurse, day, shift):
+        super().__init__(nurse, day, shift)
+        ContsTraint.__init__(self, nurse, day, shift)
 
         self.countCase = 0
+    def SumCase(self):
+        count = 0
+        countWeek = 1
+        for i in range(self._week):
+          
+          for index, nurse in enumerate(self._nurse):
+            count +=  sum(self._nuresSchedule[nurse][f'shiftWeek({countWeek +1})'])
 
+        return count
+    
     def TestCase(self):
         """ เอาไว้รันในเเต่ละ case ที่เราสร้างขึ้นมา"""
-        case = {
-            "1":self.ScheduleNures(),
-            "2":self.ShiftLimit(),
-            "3":self.SplitDay(),
-            "4":self.LastDay()
-        }
+        validation = len(self._nurse) * self.shift
+        validated = 0
+        while validated != validation:
+          case = {
+              "1":self.ScheduleNures(),
+              "2":self.ScheduleNures(),
+              "3":self.ShiftLimit(),
+              "4":self.SplitDay(),
+              "5":self.LastDay(),
+            
+          }
 
-        for i in case:
-            try:
-                case[f'{i}']
-            except:
-                print("เกิดขึ้นผิดพลาดบางอย่างใน TestCase")
-
+          for i in case:
+              try:
+                  case[f'{i}']
+              except:
+                  print("เกิดขึ้นผิดพลาดบางอย่างใน TestCase")
+          validated = self.SumCase()
+        
         """ รันครบทุก case เเล้วใหัทำการเเสดงผลออกมา """
 
 
@@ -203,9 +218,10 @@ def main():
     # print ('Argument List:', str(sys.argv))
     
     nurse = sys.argv[1].split(",")
-    Schedules = SolutionCase(nurse =  nurse, day = 7)
+    nurse = ['A', 'B', 'C']
+    Schedules = SolutionCase(nurse =  nurse, day = 7, shift = 20)
     Schedules.TestCase()
     Schedules.PrintSchedule()
-
+    
 if __name__ == "__main__":
     main()
