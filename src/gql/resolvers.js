@@ -81,7 +81,8 @@ module.exports = {
                     shift: shift,
                     approve: false,
                     leader: group._leader[0].toString()
-                }
+                },
+                noti:'2'
             })))
 
             return response
@@ -105,7 +106,7 @@ module.exports = {
 
             const { notificationId, approve } = input
             const noti = await Notification.findById(notificationId).lean()
-            noti.noift = "2"
+            noti.noift = "3"
 
             const { dutyId, shift, createdBy } = noti.fields
 
@@ -130,7 +131,7 @@ module.exports = {
                     duty: newDuty,
                     group: group
                 },
-                noift:'2'
+            
             }
             return await Notification.create(changeNoti)
         }
