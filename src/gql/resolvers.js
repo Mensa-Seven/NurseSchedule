@@ -3,7 +3,8 @@ const Group = require("../model/Group")
 const Notification = require("../model/Notification")
 const jwt = require("jsonwebtoken")
 const Duty = require("../model/Duty")
-
+const date = new Date()
+const { countShift } = require("../utils/shift")
 function requiredAuth({ authorization }) {
     return jwt.verify(authorization, process.env.JWT_SECRET)
 }
@@ -101,6 +102,7 @@ module.exports = {
             data.approve_by = decoded.user_id.sub
             const response = await Notification.updateOne({ _id: notificationId }, { $set: data })
             return response
+
         },
         
         approveLeaveLeader: async (_, { input }, context) => {
@@ -108,34 +110,54 @@ module.exports = {
 
             const { notificationId, approve } = input
             const noti = await Notification.findById(notificationId).lean()
-            noti.noift = "3"
-
-            const { dutyId, shift, createdBy } = noti.fields
-
-
-            const duty = await Duty.findById(dutyId).lean()
-           
-            // console.log(duty, noti.fields)
-            const group = await Group.findOne({name_group: duty.group})
-
-            const newDuty = JSON.parse(JSON.stringify(duty))
-
-            Object.keys(shift).forEach(key => {
-                newDuty[key] = 0
+            const data = { ...noti }
+            //const { dutyId, shift, createdBy } = data.fields
+            
+            await Notification.updateOne({_id:data.notificationId}, {noift:"3"})
+            // คนที่ขอลา
+            const duty = await Duty.findById(data.fields.duty._id)
+            const oldDuty = JSON.parse(JSON.stringify(duty))
+            const group = await Group.findOne({name_group:  noti.fields.duty.group})
+            Object.keys(data.fields.shift).forEach(key => {
+                duty[key] = 0
             })
-
-            const changeNoti = {
+            duty.count = countShift(duty)
+            await duty.save()
+            await Notification.create({
                 type: "CHANGE_DUTY",
-                _user: createdBy,
+                _user: data.fields.createdBy,
                 approve_by: decoded.user_id.sub,
                 fields: {
-                    prev: duty,
-                    duty: newDuty,
+                    prev: oldDuty,
+                    duty: duty,
                     group: group
                 }
-            
-            }
-            return await Notification.create(changeNoti)
+            })
+
+            const dutyF = await Duty.findOne({
+                _user: noti.approve_by._id,
+                year: noti.fields.duty.year,
+                month:noti.fields.duty.month,
+                day: noti.fields.duty.day
+            })
+            const oldDutyF = JSON.parse(JSON.stringify(dutyF))
+            Object.keys(data.fields.shift).forEach(key => {
+                dutyF[key] = 1
+            })
+            dutyF.count = countShift(dutyF)
+            await dutyF.save()
+            await Notification.create({
+                type: "CHANGE_DUTY",
+                _user: noti.approve_by._id,
+                approve_by: decoded.user_id.sub,
+                fields: {
+                    prev: oldDutyF,
+                    duty: dutyF,
+                    group: group
+                }
+            })
+
+            return "OK"
         }
     },
     User: {
