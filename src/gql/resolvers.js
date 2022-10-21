@@ -113,7 +113,7 @@ module.exports = {
             const data = { ...noti }
             //const { dutyId, shift, createdBy } = data.fields
             
-            await Notification.updateOne({_id:data.notificationId}, {noift:"3"})
+            await Notification.updateOne({_id:notificationId}, {noift:"3"})
             // คนที่ขอลา
             const duty = await Duty.findById(data.fields.duty._id)
             const oldDuty = JSON.parse(JSON.stringify(duty))
