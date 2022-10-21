@@ -95,7 +95,7 @@ module.exports = {
             const noti = await Notification.findById(notificationId).lean()
 
             const data = { ...noti }
-            data.fields = approve
+            data.fields.approve = approve
             data.noift = '2'
 
             const response = await Notification.updateOne({ _id: notificationId }, { $set: data })
