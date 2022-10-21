@@ -97,7 +97,8 @@ module.exports = {
             const data = { ...noti }
             data.fields.approve = approve
             data.noift = '2'
-
+            data._user = data.fields.leader
+            data.approve_by = decoded.user_id.sub
             const response = await Notification.updateOne({ _id: notificationId }, { $set: data })
             return response
         },
