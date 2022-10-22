@@ -11,7 +11,7 @@ const router = express.Router()
 const date = new Date()
 const runPy = require("../utils/runPy.js")
 const Notification = require("../model/Notification")
-
+const daysInCurrentMonth = require("../utils/CountDay")
 
 
 router.get('/test', (req, res) => {
@@ -19,7 +19,7 @@ router.get('/test', (req, res) => {
 })
 
 
-router.patch("/create/auto/:groupId", authMiddleware,async (req, res) => {
+router.patch("/create/auto/:groupId", authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
@@ -36,7 +36,16 @@ router.patch("/create/auto/:groupId", authMiddleware,async (req, res) => {
     const ids = group._member.map(e => e.toString())
 
     // run python script
-    const result = await runPy("./Heuristic-Algorithm.py", [ids])
+
+    const result = await runPy("./Heuristic-Algorithm.py", [ids, JSON.stringify({
+        day: daysInCurrentMonth,
+        maxShift: 3,
+        minShift: 1,
+        minShiftDay: 6,
+        minShiftMonth: 22,
+    })])
+
+    console.log(result)
 
     // map schedule with member id
     // {1: [[0, 1, 1, ....]], 2: [[1, 0, 0 ...]]}
@@ -47,7 +56,7 @@ router.patch("/create/auto/:groupId", authMiddleware,async (req, res) => {
         if (!acc[id]) acc[id] = []
 
         // converse array string to JS Array
-        const arr = JSON.parse(data.replace(/\s/g, ","))
+        const arr = JSON.parse(data)
         // schedule in week -> [[0,1,1], [1,1,0], [1,1,1]]
         const subArr = []
 
@@ -186,7 +195,9 @@ router.patch("/create/auto/:groupId", authMiddleware,async (req, res) => {
         }
     })
 
-    console.log(JSON.stringify(noti, null, 1))
+    console.log("diffDuty =====>", diffDuty)
+
+    // console.log(JSON.stringify(noti, null, 1))
 
     // console.log(duties)
 
@@ -194,7 +205,7 @@ router.patch("/create/auto/:groupId", authMiddleware,async (req, res) => {
         noti.map(item => Notification.create(item))
     )
 
-    res.send("Success")
+    res.send(diffDuty)
 
 })
 
