@@ -45,7 +45,6 @@ router.patch("/create/auto/:groupId", authMiddleware, async (req, res) => {
         minShiftMonth: 22,
     })])
 
-    console.log(result)
 
     // map schedule with member id
     // {1: [[0, 1, 1, ....]], 2: [[1, 0, 0 ...]]}
