@@ -53,12 +53,13 @@ router.patch('/update/schedule', authMiddleware, async (req, res) => {
             .populate('_duty')
             .lean()
 
+        if (!schedules) return res.json({ "message": "groupId not found" })
         const data = req.body.duties
         const duties = []
         data.forEach(async element => {
             duties.push(...element._duty)
-
         })
+        // console.log(data);
 
         // console.log(schedules)
 
@@ -73,6 +74,9 @@ router.patch('/update/schedule', authMiddleware, async (req, res) => {
                 }
             }
         }).filter(Boolean)
+
+        console.log(JSON.stringify(diffDuty, null, 2))
+
 
         const approveBy = uid
 
@@ -89,9 +93,9 @@ router.patch('/update/schedule', authMiddleware, async (req, res) => {
             }
         })
 
-        console.log(JSON.stringify(diffDuty, null, 2))
+        // console.log(JSON.stringify(diffDuty, null, 2))
 
-        await Promise.all(duties.map(({ duty }) => Duty.updateOne({
+        await Promise.all(diffDuty.map(({ duty }) => Duty.updateOne({
             $and: [
                 {
                     _user: duty._user
@@ -111,9 +115,10 @@ router.patch('/update/schedule', authMiddleware, async (req, res) => {
 
         await Promise.all(noti.map(item => Notification.create(item)))
 
-        res.send({ messag: "message" })
+        res.send({message: "success"})
 
     } catch (error) {
+        console.error(error)
         res.send({ error })
     }
 })
