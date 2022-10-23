@@ -75,7 +75,7 @@ router.patch('/update/schedule', authMiddleware, async (req, res) => {
             }
         }).filter(Boolean)
 
-        console.log(JSON.stringify(diffDuty, null, 2))
+        //console.log(JSON.stringify(diffDuty, null, 2))
 
 
         const approveBy = uid

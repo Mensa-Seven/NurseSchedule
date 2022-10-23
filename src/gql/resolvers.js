@@ -34,7 +34,7 @@ module.exports = {
             
             const noti = {
                 type: "DELETE_GROUP",
-                _user: "63281616042a723f63a3be27",
+                _user: "63517d1c270eff076b75e92f",
                 fields: {
                     group
                 }
