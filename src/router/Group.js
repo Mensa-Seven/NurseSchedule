@@ -39,9 +39,9 @@ router.patch("/create/auto/:groupId", authMiddleware, async (req, res) => {
 
     const result = await runPy("./Heuristic-Algorithm.py", [ids, JSON.stringify({
         day: daysInCurrentMonth,
-        maxShift: 3,
+        maxShift: 2,
         minShift: 1,
-        minShiftDay: 6,
+        minShiftDay: 20,
         minShiftMonth: 22,
     })])
 
