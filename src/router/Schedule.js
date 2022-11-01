@@ -91,6 +91,7 @@ router.patch('/update/schedule', authMiddleware, async (req, res) => {
                     group: schedules[0]._group
                 }
             }
+
         })
 
         // console.log(JSON.stringify(diffDuty, null, 2))

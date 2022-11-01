@@ -18,6 +18,7 @@ module.exports = {
                 group
             }
         }
+
         await Notification.create(noti)
         return "OK"
     },
@@ -94,14 +95,17 @@ module.exports = {
 
         await Notification.updateOne({ _id: notificationId }, { noift: "3" })
         // คนที่ขอลา
-        const duty = await Duty.findById(data.fields.duty._id)
+        const duty = await Duty.findById(data.fields.duty._id).lean()
         const oldDuty = JSON.parse(JSON.stringify(duty))
         const group = await Group.findOne({ name_group: noti.fields.duty.group })
         Object.keys(data.fields.shift).forEach(key => {
             duty[key] = 0
         })
+
         duty.count = countShift(duty)
-        await duty.save()
+        await Duty.updateOne({ _id: duty._id }, { $set: duty })
+        // await duty.save()
+
         await Notification.create({
             type: "CHANGE_DUTY",
             _user: data.fields.createdBy,
@@ -118,13 +122,15 @@ module.exports = {
             year: noti.fields.duty.year,
             month: noti.fields.duty.month,
             day: noti.fields.duty.day
-        })
+        }).lean()
+
         const oldDutyF = JSON.parse(JSON.stringify(dutyF))
         Object.keys(data.fields.shift).forEach(key => {
             dutyF[key] = 1
         })
+
         dutyF.count = countShift(dutyF)
-        await dutyF.save()
+        await Duty.updateOne({ _id: dutyF._id }, { $set: dutyF })
         await Notification.create({
             type: "CHANGE_DUTY",
             _user: noti.approve_by._id,
@@ -198,16 +204,15 @@ module.exports = {
         const decoded = requiredAuth(context)
 
         const noti = await Notification.findById(input.notificationID)
-
         if (!noti) {
             throw new Error("Notification not found")
         }
 
-        // await Notification.updateOne({ _id: noti._id }, {
-        //     $set: {
-        //         noift: "3"
-        //     }
-        // })
+        await Notification.updateOne({ _id: noti._id }, {
+            $set: {
+                noift: "3"
+            }
+        })
 
         /*
          {
@@ -239,7 +244,11 @@ module.exports = {
         _withoutMeDuty[noti.fields.withoutme.dutyString] = 0
         _withoutMeDuty.count = countShift(withoutMeDuty)
 
+        await Duty.updateOne({ _id: _meDuty._id }, { $set: _meDuty })
+        await Duty.updateOne({ _id: _withoutMeDuty._id }, { $set: _withoutMeDuty })
+
         const group = await Group.findOne({ name: noti.fields.me.group })
+
         // console.log(duty)
 
         await Notification.create({

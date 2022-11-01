@@ -39,11 +39,12 @@ router.patch("/create/auto/:groupId", authMiddleware, async (req, res) => {
 
     const result = await runPy("./Heuristic-Algorithm.py", [ids, JSON.stringify({
         day: daysInCurrentMonth,
-        maxShift: 2,
-        minShift: 1,
-        minShiftDay: 20,
-        minShiftMonth: 22,
+        maxShift: 1,
+        minShift: 0,
+        minShiftDay: 1,
+        minShiftMonth: 40,
     })])
+    console.log(result);
 
 
     // map schedule with member id
@@ -58,13 +59,14 @@ router.patch("/create/auto/:groupId", authMiddleware, async (req, res) => {
         const arr = JSON.parse(data)
         // schedule in week -> [[0,1,1], [1,1,0], [1,1,1]]
         const subArr = []
-
         // loop from schedule (7 * 3 = 21 items) to 7 days
         //                        7    / 3
+        console.log('TTTTT', arr.length/3);
         for (let i = 0; i < arr.length / 3; i++) {
             // prepare empty list
             if (!subArr[i]) subArr[i] = []
             // loop each schedule
+            
             for (let j = 0; j < 3; j++) {
                 // push member schedule by day -> at [dayIndex(0-6) * 3 + eachScheduleIndex(0-3)]
                 subArr[i].push(arr[i * 3 + j])
@@ -81,36 +83,25 @@ router.patch("/create/auto/:groupId", authMiddleware, async (req, res) => {
     // loop create schedule from map schedule
     for (const [id, v] of Object.entries(resultById)) {
         v.forEach((week, windex) => {
+            console.log('weak', windex);
             week.forEach((day, dindex) => {
                 // deconstruct array via index
                 const [morning, noon, night] = day
                 const duty = {
                     _user: id,
-                    day: windex * 7 + dindex + 1,
+                    day: windex * 31 + dindex + 1,
                     group: group.name_group,
                     morning,
                     noon,
                     night,
                     count: morning + noon + night
                 }
-
                 duties.push(duty)
             })
         })
     }
-    // user2 --> 
-    // duties.count === new_duties.count
-    // user:{
-    //     duty:[
-    //         day1,
-    //         day2
-    //     ]
-    // }
-
-    // nof.push()
-
-    // console.log(duties)
-
+  
+ 
     const isDiffUserDuty = async (userId, duty) => {
         const prev = await Duty.findOne({
             $and: [
@@ -136,10 +127,9 @@ router.patch("/create/auto/:groupId", authMiddleware, async (req, res) => {
 
     console.log(diffDuty.length)
 
-
-
     // loop update duty filter by _user and day and year
-    await Promise.all(diffDuty.map(({ duty }) => Duty.updateOne({
+    //await Promise.all(duties.map(duty => console.log(duty._user)))
+    await Promise.all(duties.map((duty ) => Duty.updateOne({
         $and: [
             {
                 _user: duty._user
@@ -194,15 +184,15 @@ router.patch("/create/auto/:groupId", authMiddleware, async (req, res) => {
         }
     })
 
-    console.log("diffDuty =====>", diffDuty)
+    //console.log("diffDuty =====>", diffDuty)
 
     // console.log(JSON.stringify(noti, null, 1))
 
     // console.log(duties)
 
-    await Promise.all(
-        noti.map(item => Notification.create(item))
-    )
+    // await Promise.all(
+    //     noti.map(item => Notification.create(item))
+    // )
 
     res.send(diffDuty)
 

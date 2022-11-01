@@ -119,7 +119,6 @@ router.get('/invite', authMiddleware, async (req, res) => {
     const pk = verifyToken(token)
     const uid = pk.user_id.sub
 
-
     try {
 
         const invite = await Invite.find({ _member: uid, show: true })
@@ -135,6 +134,7 @@ router.get('/invite', authMiddleware, async (req, res) => {
     }
 
 })
+
 router.post('/invite', authMiddleware, async (req, res) => {
     const token = req.query.token || req.headers['x-access-token']
     const pk = verifyToken(token)
